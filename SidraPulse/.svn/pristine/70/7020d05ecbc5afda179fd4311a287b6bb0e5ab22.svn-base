@@ -1,0 +1,122 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relavie_sign_in"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_bg"
+    tools:context=".ClassifiedDetailsActivity" >
+
+    <ImageView
+        android:id="@+id/img_view_logo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/login_top_img" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_sidra_user_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ed_txt_user_id"
+        android:layout_below="@+id/img_view_logo"
+        android:layout_marginTop="@dimen/margin_top_left"
+        android:text="@string/user_id"
+        android:textColor="@color/color_title"
+        android:textSize="@dimen/id_pass_size"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <EditText
+        android:id="@+id/ed_txt_user_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_view_sidra_user_id"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dip"
+        android:background="@drawable/id_text"
+        android:ems="10"
+        android:hint="username@sidra.org"
+        android:inputType="textPersonName"
+        android:paddingLeft="10dip" >
+
+        <requestFocus />
+    </EditText>
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ed_txt_user_id"
+        android:layout_below="@+id/ed_txt_user_id"
+        android:layout_marginTop="@dimen/margin_top_left"
+        android:text="@string/user_password"
+        android:textColor="@color/color_title"
+        android:textSize="@dimen/id_pass_size"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <EditText
+        android:id="@+id/ed_txt_user_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_view_password"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="7dip"
+        android:background="@drawable/id_text"
+        android:hint="password"
+        android:ems="10"
+        android:inputType="textPassword"
+        android:paddingLeft="10dip" >
+    </EditText>
+
+    <LinearLayout
+        android:id="@+id/relative_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ed_txt_user_password"
+        android:layout_alignRight="@+id/ed_txt_user_password"
+        android:layout_below="@+id/ed_txt_user_password"
+        android:layout_marginTop="@dimen/margin_top_left"
+        android:orientation="horizontal"
+        android:gravity="center_vertical" >
+
+        <CheckBox
+            android:id="@+id/check_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:button="@drawable/terms_holdar"
+            android:gravity="center" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_terms_condition"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:text="@string/terms_condition"
+            android:textColor="@color/black"
+            android:textColorLink="@color/blue"
+            android:textSize="12sp"
+            customview:fontName="ProximaNova-Regular.otf" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_terms_of_use"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dip"
+            android:text="@string/terms_of_user"
+            android:textColor="@color/blue"
+            android:textSize="@dimen/id_pass_size"
+            android:visibility="gone"
+            customview:fontName="ProximaNova-Semibold.otf" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_sign_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/relative_check_box"
+        android:layout_below="@+id/relative_check_box"
+        android:layout_marginTop="@dimen/margin_top_left_right"
+        android:background="@drawable/sagn_in_btn" />
+
+</RelativeLayout>

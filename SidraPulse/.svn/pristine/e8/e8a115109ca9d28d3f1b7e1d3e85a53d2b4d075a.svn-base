@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.atomix.sidrapulse"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="18" />
+
+    <supports-screens
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
+    <permission
+        android:name="com.atomix.sidrapulse.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.atomix.sidrapulse.permission.C2D_MESSAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/app_icon"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Black.NoTitleBar" >
+        <provider
+            android:name="com.atomix.utils.TagProviderHashTagDetails"
+            android:authorities="com.atomix.sidrapulse.ForumHashTagDetails" />
+
+        <activity
+            android:name="com.atomix.sidrapulse.SplashScreenActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.SignInActivity"
+            android:label="@string/title_activity_sign_in"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.MainMenuActivity"
+            android:label="@string/title_activity_main_menu"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.AnnouncementsActivity"
+            android:label="@string/title_activity_announcements"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.StaffDirectoryActivity"
+            android:label="@string/title_activity_staff_directory"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ForumsActivity"
+            android:label="@string/title_activity_forums"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ClassifiedsActivity"
+            android:label="@string/title_activity_classifieds"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.OffersPromotionsActivity"
+            android:label="@string/title_activity_offers_promotions"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.EventsActivity"
+            android:label="@string/title_activity_events"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.NewsLetterActivity"
+            android:label="@string/title_activity_news_letter"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.GalleryActivity"
+            android:label="@string/title_activity_gallery"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.HumanResourcesActivity"
+            android:label="@string/title_activity_human_resources"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.PoliciesActivity"
+            android:label="@string/title_activity_policies"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.StayInformedActivity"
+            android:label="@string/title_activity_stay_informed"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.TermsOfUseActivity"
+            android:label="@string/title_activity_terms_of_use"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="com.atomix.sidrapulse.TermsOfUseActivity"
+                    android:scheme="atomix" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.AnnouncementDetailsActivity"
+            android:label="@string/title_activity_announcement_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.GalleryDetailsActivity"
+            android:label="@string/title_activity_gallery_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ViewPagerActivity"
+            android:label="@string/title_activity_view_pager"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.OffersPromotionsDetailsActivity"
+            android:label="@string/title_activity_offers_promotions_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.stayinformed.SidraNewsActivity"
+            android:label="@string/title_activity_sidra_news"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.stayinformed.PressReleaseActivity"
+            android:label="@string/title_activity_press_release"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.stayinformed.SocialChannelsActivity"
+            android:label="@string/title_activity_social_channels"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.staffdirectory.StaffDirectoryItemActivity"
+            android:label="@string/title_activity_finance"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ClassifiedDetailsActivity"
+            android:label="@string/title_activity_classified_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ForumsDetailsActivity"
+            android:label="@string/title_activity_forums_details"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ForumNewPostActivity"
+            android:label="@string/title_activity_forums_details"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.EventDetailsActivity"
+            android:label="@string/title_activity_event_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.PolicyDetailsActivity"
+            android:label="@string/title_activity_policy_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.PolicyDepartmentActivity"
+            android:label="@string/title_activity_policy_department"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.HumanResourceDetailsActivity"
+            android:label="@string/title_activity_human_resource_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.PressReleaseDetailsActivity"
+            android:label="@string/title_activity_press_release_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ClassifiedsCreateNewPostActivity"
+            android:label="@string/title_activity_press_release_details"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.multipleimagepicker.CustomGalleryActivity"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="luminous.ACTION_PICK" />
+                <action android:name="luminous.ACTION_MULTIPLE_PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.StaffDirectorySearchActivity"
+            android:label="@string/title_activity_staff_directory_search"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ClassifiedPreviewPost"
+            android:label="@string/title_activity_classified_preview_post"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.stayinformed.SidraNewsDetailsActivity"
+            android:label="@string/title_activity_sidra_news_details"
+            android:screenOrientation="portrait" >
+        </activity>
+
+        <service
+            android:name="com.atomix.notification.NotificationService"
+            android:enabled="true" />
+
+        <receiver android:name="com.atomix.notification.NotificationReceiver" />
+        <receiver android:name="com.atomix.notification.ScreenReceiver" >
+        </receiver>
+        <receiver
+            android:name="com.atomix.gcm.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="com.atomix.sidrapulse" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name="com.atomix.gcm.GcmIntentService" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="com.atomix.sidrapulse.ForumHashTagDetails"
+            android:label="@string/title_activity_forum_hash_tag_details"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data
+                    android:host="com.atomix.sidrapulse.ForumHashTagDetails"
+                    android:scheme="atomix" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.VideoPlayerActivity"
+            android:label="@string/title_activity_sidra_video_player"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.FullViewImageActivity"
+            android:label="@string/title_activity_sidra_video_player"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.atomix.sidrapulse.ArticleDetailsActivity"
+            android:label="@string/title_activity_article_details"
+            android:screenOrientation="portrait" >
+        </activity>
+    </application>
+
+</manifest>

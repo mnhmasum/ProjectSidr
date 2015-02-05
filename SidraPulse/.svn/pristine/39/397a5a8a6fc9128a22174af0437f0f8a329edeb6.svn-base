@@ -1,0 +1,815 @@
+package com.atomix.sidrapulse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
+import android.webkit.URLUtil;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.atomix.adapter.ForumsDetailsAdapter;
+import com.atomix.adapter.ViewPagerAdapter;
+import com.atomix.customview.DialogController;
+import com.atomix.customview.SidraCustomProgressDialog;
+import com.atomix.customview.TextViewFixTouchConsume;
+import com.atomix.datamodel.ForumCommentator;
+import com.atomix.datamodel.ForumComments;
+import com.atomix.interfacecallback.OnUploadComplete;
+import com.atomix.interfacecallback.UnReadRequest;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.multipleimagepicker.CustomGallery;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.atomix.synctask.DeleteTask;
+import com.atomix.synctask.ImageUploadAsyncTask;
+import com.atomix.synctask.VideoCommentsAsyncTask;
+import com.atomix.utils.UrlFinder;
+import com.atomix.utils.Utilities;
+import com.leocardz.link.preview.library.LinkPreviewCallback;
+import com.leocardz.link.preview.library.SourceContent;
+import com.leocardz.link.preview.library.TextCrawler;
+
+public class ForumsDetailsActivity extends Activity implements OnClickListener {
+	
+	private int position;
+	private int imageAdded;
+	private String comments = "";
+	private String selectedImagePath = "";
+	
+	private Button btnBack;
+	private Button btnMenu;
+	private Button btnCamera;
+    private Button dialogBtnSend;
+	private Button dialogBtnYes;
+	private Button dialogBtnNo;
+	private TextView dialogMsg;
+
+	public static ListView listViewForum;
+	public static TextView txtViewCommentsCount;
+	
+	private TextView txtViewTitle;
+	private TextView txtViewDate;
+	private TextView txtUserEmail;
+	private TextView txtViewPhoneNo;
+	private TextView txtViewNoData;
+	public static TextView txtViewHeaderNoData;
+	
+	private EditText editTextComments;
+	private EditText editTextDialogReply;
+	
+	private ImageButton btnDelete;
+	
+	private ViewPager viewPager;
+	private ViewPagerAdapter viewPagerAdapter;
+	private LinearLayout linear_image_holder;
+	private LinearLayout linearIndicatorLayout;
+	private LinearLayout linearImageAdd;
+	private RelativeLayout relativeMain;
+	private RelativeLayout relativeHeaderMain;
+	private RelativeLayout relativeCommentsRow;
+	private Dialog dialogConfirmation;
+	private Dialog dialogReply;
+
+	private TextCrawler textCrawler;
+
+	private String currentTitle, currentUrl, imagePreviewUrl, currentDescription;
+
+	private boolean isBackPressed;
+	private boolean isIntentOpen;
+	
+	public ArrayList<CustomGallery> customGallery;
+	private ForumsDetailsAdapter forumDetailsaAdapter;
+	private String replyText;
+	private final int CHOOSE_SINGLE = 100;
+	private boolean isPathLocal = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_forums_details);
+		initViews();
+		loadData();
+		setListener();
+		initCommentDialog();
+		textCrawler = new TextCrawler();
+	}
+
+	private void initCommentDialog() {
+		dialogReply = new DialogController(ForumsDetailsActivity.this).ForumsReplyDialog();
+		editTextDialogReply = (EditText) dialogReply.findViewById(R.id.txt_view_reply);
+		linearImageAdd = (LinearLayout) dialogReply.findViewById(R.id.linear_img_add);
+		
+		final TextView txtViewCountLimit = (TextView) dialogReply.findViewById(R.id.txt_view_character_count);
+		final Button dialogBtnCamera = (Button) dialogReply.findViewById(R.id.btn_add);
+		dialogBtnSend = (Button) dialogReply.findViewById(R.id.btn_send);
+		dialogBtnSend.setEnabled(false);
+		dialogBtnSend.setAlpha(0.3f);
+		Button dialogBtnClose = (Button) dialogReply.findViewById(R.id.btn_close);
+		
+		RelativeLayout relative_scrollview_holder = (RelativeLayout) dialogReply.findViewById(R.id.relative_scrollview_holder);
+		RelativeLayout relativeLayout1 = (RelativeLayout) dialogReply.findViewById(R.id.relativeLayout1);
+		
+		relative_scrollview_holder.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			
+			}
+		});
+		
+		relativeLayout1.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			}
+		});
+		
+		dialogBtnCamera.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (imageAdded < 1) {
+					selectImage();
+				} else {
+					Utilities.showToast(ForumsDetailsActivity.this, "Already you have selected a photo");
+				}
+			}
+		});
+
+		dialogBtnSend.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				
+				if (imageAdded > 0 || !editTextDialogReply.getText().toString().trim().equalsIgnoreCase("")) {
+					onClickBtnCommentsSend(v);
+				} else {
+					//Utilities.showToast(ForumsDetailsActivity.this, "Please write something or attach a link to keep your reply");
+				}
+				
+			}
+		});
+		
+		dialogBtnClose.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				//onClickBtnCommentsSend();
+				imageAdded = 0;
+				dialogReply.dismiss();
+				initCommentDialog();
+				
+			}
+
+		});
+		
+		editTextDialogReply.addTextChangedListener(new TextWatcher() {
+		    @Override
+		    public void onTextChanged(CharSequence s, int start, int before, int count) {
+		    	
+		    }
+
+		    @Override
+		    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		    	
+		    }
+
+		    @Override
+		    public void afterTextChanged(Editable s) {
+		    	
+		    	if (editTextDialogReply.getText().toString().trim().length() > 250) {
+		    		dialogBtnSend.setEnabled(false);
+		    		dialogBtnSend.setAlpha(0.3f);
+		        	int lengthChar = 250 - editTextDialogReply.getText().toString().trim().length();
+		        	txtViewCountLimit.setText("" + lengthChar );
+		        	txtViewCountLimit.setTextColor(android.graphics.Color.RED);
+		        	return;
+		    	}
+		    	
+		        if(editTextDialogReply.getText().toString().trim().length() > 0 && editTextDialogReply.getText().toString().trim().length() <= 250) {
+		        	dialogBtnSend.setEnabled(true);
+		    		dialogBtnSend.setAlpha(1.0f);
+		        	int lengthChar = 250 - editTextDialogReply.getText().toString().trim().length();
+		        	txtViewCountLimit.setText(Integer.toString(lengthChar));
+		        	txtViewCountLimit.setTextColor(0xFF9B9CA0);
+		        	
+		        } else {
+		        	dialogBtnSend.setEnabled(false);
+		    		dialogBtnSend.setAlpha(0.3f);
+		    		int lengthChar = 250 - editTextDialogReply.getText().toString().trim().length();
+		        	txtViewCountLimit.setText(Integer.toString(lengthChar));
+		    		txtViewCountLimit.setTextColor(0xFF9B9CA0);
+		        }
+		        
+		        /*if (editTextDialogReply.getText().toString().trim().length() == 0) {
+		        	dialogBtnSend.setEnabled(false);
+		    		dialogBtnSend.setAlpha(0.3f);
+		    		txtViewCountLimit.setTextColor(0xFF9B9CA0);
+		        	//Utilities.showToast(ForumsDetailsActivity.this, "Reached to maximum number of character");
+		        }*/
+		    }
+		});
+	}
+
+	private void initViews() {
+		position = getIntent().getExtras().getInt("click_position");
+		relativeMain = (RelativeLayout) findViewById(R.id.relative_main);
+		
+		btnBack = (Button) findViewById(R.id.btn_back);
+		btnMenu = (Button) findViewById(R.id.btn_menu);
+		listViewForum = (ListView) findViewById(R.id.lst_view_forum);
+		editTextComments = (EditText) findViewById(R.id.edit_txt_reply);
+		txtViewNoData  = (TextView) findViewById(R.id.txt_view_no_data);
+		btnCamera = (Button) findViewById(R.id.btn_camera);
+		
+		dialogConfirmation = new DialogController(ForumsDetailsActivity.this).DeleteConfirmationDialog();
+		dialogBtnYes = (Button) dialogConfirmation.findViewById(R.id.btn_yes);
+		dialogBtnNo = (Button) dialogConfirmation.findViewById(R.id.btn_no);
+
+		dialogMsg = (TextView) dialogConfirmation.findViewById(R.id.txt_view_dialog_message);
+		dialogMsg.setText("Are you sure you want to delete your forum post?");
+		
+		View header = (View) getLayoutInflater().inflate(R.layout.header_forum_details, null);
+		
+		linearIndicatorLayout = (LinearLayout) header.findViewById(R.id.linear_indicator);
+		relativeHeaderMain = (RelativeLayout) header.findViewById(R.id.relative_header_forum_details);
+		viewPager =(ViewPager) header.findViewById(R.id.view_pager);
+		viewPager.setOffscreenPageLimit(3);
+		
+		txtViewHeaderNoData = (TextView) header.findViewById(R.id.txt_view_no_data_header);
+		txtViewTitle = (TextView) header.findViewById(R.id.txt_view_title);
+		txtViewDate = (TextView) header.findViewById(R.id.txt_view_date);
+		txtUserEmail = (TextView) header.findViewById(R.id.txt_view_email);
+		txtViewPhoneNo = (TextView) header.findViewById(R.id.txt_view_mobile);
+		txtViewCommentsCount = (TextView) header.findViewById(R.id.txt_view_comments_count);
+		linear_image_holder = (LinearLayout) header.findViewById(R.id.linear_image_holder); 
+		btnDelete = (ImageButton) header.findViewById(R.id.img_btn_delete);
+		
+		txtViewHeaderNoData.setVisibility(View.GONE);
+//		Log.i("CONSTANT_ID","**" + SidraPulseApp.getInstance().getUserInfo().getUserID());
+//		Log.i("GET_ID","*" + SidraPulseApp.getInstance().getForumsInfoList().get(position).getId());
+//		Log.i("LIST_ID","*" + SidraPulseApp.getInstance().getForumsInfoList().get(position).getCreatedBy());
+		
+		if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getCreatedBy() == SidraPulseApp.getInstance().getUserInfo().getUserID()) {
+			btnDelete.setVisibility(View.VISIBLE);
+		} else {
+			btnDelete.setVisibility(View.INVISIBLE);
+		}
+		
+		listViewForum.addHeaderView(header);
+	}
+	
+	private void setListener() {
+		relativeMain.setOnClickListener(this);
+		relativeHeaderMain.setOnClickListener(this);
+		btnBack.setOnClickListener(this);
+		btnDelete.setOnClickListener(this);
+		btnCamera.setOnClickListener(this);
+		btnMenu.setOnClickListener(this);
+		
+		txtUserEmail.setOnClickListener(this);
+		txtViewPhoneNo.setOnClickListener(this);
+		
+		/*Delete dialog listener */
+		dialogBtnYes.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				if (InternetConnectivity.isConnectedToInternet(ForumsDetailsActivity.this)) {
+					new DeleteTask(ForumsDetailsActivity.this, new UnReadRequest() {
+						@Override
+						public void onTaskCompleted(int status) {
+							finish();	
+							if(status == 1){
+								SidraPulseApp.getInstance().getForumsInfoList().remove(position);
+							}else{
+								Utilities.showToast(ForumsDetailsActivity.this, ConstantValues.failureMessage);
+							}
+						}
+					}, "7", Integer.toString(SidraPulseApp.getInstance().getForumsInfoList().get(position).getId())).execute();
+				
+				} else {
+					SidraPulseApp.getInstance().openDialogForInternetChecking(ForumsDetailsActivity.this);
+				}
+			}
+		});
+		
+		dialogBtnNo.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogConfirmation.dismiss();
+			}
+		});
+		
+		txtViewTitle.setLinksClickable(true);
+		txtViewTitle.setMovementMethod(LinkMovementMethod.getInstance());
+		
+		Pattern tagMatcher = Pattern.compile("[#]+[A-Za-z0-9-_]+\\b");
+		txtViewTitle.setMovementMethod(TextViewFixTouchConsume.LocalLinkMovementMethod.getInstance());
+        String newActivityURL = "atomix://com.atomix.sidrapulse.ForumHashTagDetails/";
+        Linkify.addLinks(txtViewTitle, tagMatcher, newActivityURL);
+        txtViewTitle.setLinkTextColor(getResources().getColor(R.color.hash_tag_color));
+        Utilities.stripUnderlines(txtViewTitle);
+		
+		/*View pager indicator change on item change listener */
+		viewPager.setOnPageChangeListener(new OnPageChangeListener() {
+	         
+	         @Override
+	         public void onPageSelected(int index) {
+        		for(int count = 0; count < SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumPhotos().size(); count++) {
+        			
+	        	 	if (index == count) {
+	        	 		linearIndicatorLayout.findViewWithTag(count).setBackgroundResource(R.drawable.circle_selected);
+	        	 		
+	        	 	} else{
+	        	 		linearIndicatorLayout.findViewWithTag(count).setBackgroundResource(R.drawable.circle);
+	        	 	} 
+	        	 }
+	         }
+
+	         @Override
+	         public void onPageScrolled(int arg0, float arg1, int arg2) {
+	        	 
+	         }
+	         
+	         @Override
+	         public void onPageScrollStateChanged(int arg0) {
+	        	 
+	         }
+	         
+	      });
+		
+	}
+	
+	private void loadData() {
+		
+		txtViewTitle.setText(SidraPulseApp.getInstance().getForumsInfoList().get(position).getText());
+		Linkify.addLinks(txtViewTitle, Linkify.ALL);
+		txtViewDate.setText(SidraPulseApp.getInstance().getForumsInfoList().get(position).getCreatedAt());
+		
+		if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getAuthorInfo().getEmail() != null) {
+			if ("".equals(SidraPulseApp.getInstance().getForumsInfoList().get(position).getAuthorInfo().getEmail().trim())) {
+				txtUserEmail.setText("Unavailable");
+				txtUserEmail.setEnabled(false);
+			} else {
+				txtUserEmail.setText(SidraPulseApp.getInstance().getForumsInfoList().get(position).getAuthorInfo().getEmail().trim());
+			}
+		} else {
+			txtUserEmail.setText("Unavailable");
+			txtUserEmail.setEnabled(false);
+		}
+		
+		if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getAuthorInfo().getMobile() != null) {
+			if ("".equalsIgnoreCase(SidraPulseApp.getInstance().getForumsInfoList().get(position).getAuthorInfo().getMobile().trim())) {
+				txtViewPhoneNo.setText("Unavailable");
+				txtViewPhoneNo.setEnabled(false);
+			} else {
+				txtViewPhoneNo.setText(""+SidraPulseApp.getInstance().getForumsInfoList().get(position).getAuthorInfo().getMobile().trim());
+			}
+			
+		} else {
+			txtViewPhoneNo.setText("Unavailable");
+			txtViewPhoneNo.setEnabled(false);
+		}
+		
+		txtViewCommentsCount.setText("Comments (" + SidraPulseApp.getInstance().getForumsInfoList().get(position).getTotalComments()+")");
+		
+		ArrayList<HashMap<String, String>> mediaList = new ArrayList<HashMap<String, String>>();
+		for(int count = 0; count < SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumPhotos().size(); count++) {
+			HashMap<String, String> map = new HashMap<String, String>();
+			map.put("media_type", Integer.toString(1));
+			map.put("url", SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumPhotos().get(count).getPhoto());
+			mediaList.add(map);
+		}
+		
+		//imgView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+		
+		if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumPhotos().size() > 0) {
+			linear_image_holder.setVisibility(View.VISIBLE);
+		} else {
+			linear_image_holder.setVisibility(View.GONE);
+		}
+		
+		if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumPhotos().size() > 0) {
+			for(int j = 0; j < SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumPhotos().size(); j++) {
+		        ImageView image = new ImageView(ForumsDetailsActivity.this);
+		        image.setBackgroundResource(R.drawable.circle);
+		        image.setTag(j);
+		        linearIndicatorLayout.addView(image);
+			}
+			
+		    linearIndicatorLayout.findViewWithTag(0).setBackgroundResource(R.drawable.circle_selected);
+		}
+		
+		viewPagerAdapter = new ViewPagerAdapter(ForumsDetailsActivity.this, mediaList, isPathLocal, true, 1);
+		viewPager.setAdapter(viewPagerAdapter);
+		
+		forumDetailsaAdapter = new ForumsDetailsAdapter(ForumsDetailsActivity.this, SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumComments(), position);
+		
+		if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getTotalComments() > 0) {
+			
+			txtViewNoData.setVisibility(View.GONE);
+			txtViewHeaderNoData.setVisibility(View.GONE);
+			listViewForum.setAdapter(forumDetailsaAdapter);
+			
+		} else if (SidraPulseApp.getInstance().getForumsInfoList().get(position).getTotalComments() == 0) {
+			listViewForum.setAdapter(forumDetailsaAdapter);
+			txtViewHeaderNoData.setVisibility(View.VISIBLE);
+			txtViewNoData.setText(ConstantValues.NO_COMMENTS_MESSAGE);
+			
+		} else {
+			listViewForum.setAdapter(forumDetailsaAdapter);
+			//txtViewNoData.setVisibility(View.VISIBLE);
+			txtViewHeaderNoData.setVisibility(View.VISIBLE);
+			txtViewNoData.setText(ConstantValues.NO_COMMENTS_MESSAGE);
+			
+		}
+			
+	}
+	
+	public void onClickBtnCommentsSend(View v) {
+		
+		int count = 0;
+		String msg = editTextDialogReply.getText().toString().trim();
+		replyText = msg;
+        Matcher m = UrlFinder.getMatcher(msg);
+        
+        while (m.find()) {
+        	System.out.println(URLUtil.isValidUrl(msg.substring(m.start(0),m.end(0)))+" URL: "+ msg.substring(m.start(0),m.end(0)));
+        	count++;
+        }
+        
+        if (count > 0) {
+        	if (InternetConnectivity.isConnectedToInternet(ForumsDetailsActivity.this)) {
+        		//textCrawler.makePreview(callback, replyText);
+        		saveComments(msg, "");
+        	} else {
+        		SidraPulseApp.getInstance().openDialogForInternetChecking(ForumsDetailsActivity.this);
+			}
+        	
+        } else {
+        	//Comments save when no http link availabel
+        	//String comments = editTextDialogReply.getText().toString().trim() + "|" + "" + "|" + "" + "|" + "" + "|" + "";
+        	saveComments(msg, "");
+        }
+        
+        SidraPulseApp.getInstance().hideKeyboard(getApplicationContext(), v);
+	}
+	
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_back:
+			isBackPressed = true;
+			onBackPressed();
+			break;
+			
+		case R.id.btn_menu:
+			startActivity(new Intent(ForumsDetailsActivity.this, MainMenuActivity.class));
+			finish();
+			break;
+			
+		case R.id.btn_camera:
+			dialogReply.show();
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			break;
+			
+		case R.id.img_btn_delete:
+			dialogConfirmation.show();
+			break;
+			
+		case R.id.relative_main:
+			SidraPulseApp.getInstance().hideKeyboard(getApplicationContext(), v);
+			dialogReply.hide();
+			break;
+			
+		case R.id.relative_header_forum_details:
+			SidraPulseApp.getInstance().hideKeyboard(getApplicationContext(), v);
+			dialogReply.hide();
+			break;
+			
+		case R.id.txt_view_email:
+			Intent intent_email = new Intent(Intent.ACTION_SEND);
+			intent_email.setType("plain/text");
+			intent_email.putExtra(Intent.EXTRA_EMAIL, new String[] {txtUserEmail.getText().toString()});
+			intent_email.putExtra(Intent.EXTRA_SUBJECT, "RE: " + txtViewTitle.getText().toString().trim());
+			try {
+				startActivity(Intent.createChooser(intent_email, ""));
+			} catch (android.content.ActivityNotFoundException ex) {
+			    Toast.makeText(ForumsDetailsActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+			}
+			
+			break;
+			
+		case R.id.txt_view_mobile:
+			Intent intent_phone = new Intent(Intent.ACTION_DIAL);
+			intent_phone.setData(Uri.parse("tel:"+ txtViewPhoneNo.getText().toString()));
+			startActivity(intent_phone); 
+			break;
+			
+		default:
+			break;
+		}
+		
+	}
+	
+	private void selectImage() {
+		Intent i = new Intent("luminous.ACTION_PICK");
+		startActivityForResult(i, CHOOSE_SINGLE);
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		isIntentOpen = false;
+		
+		if (resultCode != RESULT_OK)
+			return;
+		
+		switch (requestCode) {
+		
+		case CHOOSE_SINGLE:
+			selectedImagePath = data.getStringExtra("single_path");
+			Log.e("selected Path from gallery", "------------" + selectedImagePath);
+			
+			Bitmap bm1;
+			BitmapFactory.Options btmapOptions1 = new BitmapFactory.Options();
+			bm1 = BitmapFactory.decodeFile(selectedImagePath, btmapOptions1);
+			bm1 = Bitmap.createScaledBitmap(bm1, 120, 120, true);
+			
+
+			linearImageAdd.setVisibility(View.VISIBLE);
+			LayoutInflater inflater1 = LayoutInflater.from(ForumsDetailsActivity.this);
+			final View item1 = inflater1.inflate(R.layout.select_forum_image_row, null);
+			  
+			ImageView imageView1 = (ImageView) item1.findViewById(R.id.img_view_select);
+			final Button btnCancel1 = (Button) item1.findViewById(R.id.btn_cancel);
+
+			imageView1.setImageBitmap(bm1);
+			btnCancel1.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Log.i("CLickImage_pos","" + v.getTag());
+					((LinearLayout)item1.getParent()).removeView(item1);
+					imageAdded = imageAdded - 1;
+					selectedImagePath = "";
+					linearImageAdd.setVisibility(View.GONE);
+					if (editTextDialogReply.getText().toString().trim().equalsIgnoreCase("")) {
+						dialogBtnSend.setEnabled(false);
+						dialogBtnSend.setAlpha(0.3f);
+					}
+				}
+			});
+			
+			imageAdded = imageAdded + 1;
+			linearImageAdd.addView(item1);
+			
+			if (imageAdded > 0 && editTextDialogReply.getText().toString().trim().length() <= 250) {
+				dialogBtnSend.setEnabled(true);
+				dialogBtnSend.setAlpha(1.0f);
+			}
+			break;
+
+		}
+	}
+	
+	private ProgressDialog dlogProg;
+	private LinkPreviewCallback callback = new LinkPreviewCallback() {
+		@Override
+		public void onPre() {
+			currentTitle = currentDescription = currentUrl = imagePreviewUrl = "";
+			dlogProg = SidraCustomProgressDialog.creator(ForumsDetailsActivity.this);
+		}
+
+		@Override
+		public void onPos(final SourceContent sourceContent, boolean isNull) {
+			if (dlogProg.isShowing()) {
+				dlogProg.dismiss();
+			}
+			if (isNull || sourceContent.getFinalUrl().equals("")) {
+
+			} else {
+
+				if (sourceContent.getImages().size() > 0) {
+
+					if (sourceContent.getImages().size() > 1) {
+						Log.i("PREVIEW_IMG","*#URL== " + sourceContent.getImages().get(0));
+						imagePreviewUrl = sourceContent.getImages().get(0);
+					} else {
+						imagePreviewUrl = "N/A";
+					}
+					
+				} else {
+					
+				}
+
+			}
+
+			currentTitle = sourceContent.getTitle();
+			currentDescription = sourceContent.getDescription();
+			currentUrl = sourceContent.getUrl();
+			replyText = editTextDialogReply.getText().toString().trim();
+			//imagePreviewUrl = sourceContent.getCannonicalUrl();
+			
+			try {
+				comments = replyText + "|" + currentTitle + "|" + currentDescription + "|" + currentUrl + "|" + imagePreviewUrl;
+			} catch (Exception e) {
+				Log.i("Exception Preview Image","" + e.getMessage());
+			}
+			
+			int count = 0;
+			String checkUrl = "";
+			String msg = replyText;
+	        Matcher m = UrlFinder.getMatcher(msg);
+	        
+	        while (m.find()) {
+	        	System.out.println(URLUtil.isValidUrl(msg.substring(m.start(0),m.end(0)))+" URL: "+ msg.substring(m.start(0),m.end(0)));
+	        	checkUrl = msg.substring(m.start(0),m.end(0));
+	        	count++;
+	        }
+	        
+	        if (count > 0) {
+	        	 if (UrlFinder.isVideo(checkUrl)) {
+	        		 	VideoCommentsAsyncTask imageUploadFromCamera = new VideoCommentsAsyncTask(ForumsDetailsActivity.this, new OnUploadComplete() {
+							@Override
+							public void onUploadComplete(int responseStatus, String data) {
+								if (data.toString().trim().equalsIgnoreCase("Not Found")) {
+									saveComments(comments, "");
+									return;
+								}
+								
+								if(responseStatus == 1 && !data.toString().trim().equalsIgnoreCase("Not Found")) {
+									JSONObject jDataObj;
+									try {
+										jDataObj = new JSONObject(data);
+										
+										String title = jDataObj.getString("provider_name");
+										String iframe = jDataObj.getString("html");
+										String desc = jDataObj.getString("title");
+										String thumb = jDataObj.getString("thumbnail_url");
+										String providerUrl = jDataObj.getString("provider_url");
+										
+										Log.i("DATA YOUTUBE","Title: " + title + " Iframe:  " + iframe + " Desc: " + desc + " Thumb: " + thumb);
+										//comments = replyText + "|" + title + "|" + desc + "|" + providerUrl + "|" + thumb;
+										//saveComments(comments, iframe);
+										saveComments(replyText, iframe);
+										
+									} catch (JSONException e) {
+										e.printStackTrace();
+										Toast.makeText(ForumsDetailsActivity.this, "Error: " + data, Toast.LENGTH_LONG).show();
+									}
+									
+								} else if(responseStatus == 5) {
+									SidraPulseApp.getInstance().accessTokenChange(ForumsDetailsActivity.this);
+									
+								}  else {
+									Toast.makeText(ForumsDetailsActivity.this, "Error in server response", Toast.LENGTH_LONG).show();
+								}
+								
+							}
+							
+						}, 1);
+						imageUploadFromCamera.execute(ConstantValues.FUNC_ID_THREAD_PHOTO_UPLOAD, UrlFinder.getVideoProvider(checkUrl));
+						Log.i("DATA Vimeo","Vimeo: " + UrlFinder.getVideoProvider(checkUrl));
+					
+			      } else {
+			    	  saveComments(comments, "");
+			      }
+	        	
+	        } else {
+	        	//saveComments(replyText + "|" + currentTitle + "|" + currentDescription + "|" + currentUrl + "|" + imagePreviewUrl);
+	        }
+			
+		}
+	};
+	
+	public void saveComments(final String comments, final String videoUrl) {
+		ImageUploadAsyncTask imageUpload = new ImageUploadAsyncTask(ForumsDetailsActivity.this, new OnUploadComplete() {
+
+			@Override
+			public void onUploadComplete(int result, String responseData) {
+				if (result == 1) {
+					try { 
+						JSONObject jDataObj = new JSONObject(responseData);
+						JSONObject jDataComments = jDataObj.getJSONObject("data");
+						
+						ForumCommentator fcommentator = new ForumCommentator();
+						fcommentator.setEmail("");
+						fcommentator.setMobile("0");
+						fcommentator.setName("You");
+						
+						ForumComments newForumComments = new ForumComments();
+						newForumComments.setCreatedAt("Today");
+						newForumComments.setCommentText(comments);
+						newForumComments.setVideoUrl(videoUrl);
+						
+						newForumComments.setCommentsPhoto(selectedImagePath);
+						newForumComments.setForumId(SidraPulseApp.getInstance().getForumsInfoList().get(position).getId());
+						newForumComments.setUpdatedAt("");
+						newForumComments.setUserId(SidraPulseApp.getInstance().getUserInfo().getUserID());
+						newForumComments.setCommentsPhoto(jDataComments.getString("image"));
+						newForumComments.setId(Integer.parseInt(jDataComments.getString("comment_id")));
+						newForumComments.setIsDel(0);
+						
+						newForumComments.setCommentator(fcommentator);
+						SidraPulseApp.getInstance().getForumsInfoList().get(position).getForumComments().add(0,newForumComments);
+						dialogReply.dismiss();
+						
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+					
+					int getReplyCount = SidraPulseApp.getInstance().getForumsInfoList().get(position).getTotalComments();
+					SidraPulseApp.getInstance().getForumsInfoList().get(position).setTotalComments(getReplyCount+1);
+					txtViewCommentsCount.setText("Comments (" + Integer.toString(SidraPulseApp.getInstance().getForumsInfoList().get(position).getTotalComments())+")");
+					forumDetailsaAdapter.notifyDataSetChanged();
+					listViewForum.setSelection(1);
+					
+					imageAdded = 0;
+					selectedImagePath = "";
+					editTextComments.setText("");
+					linearImageAdd.removeAllViews();
+			        linearImageAdd.setVisibility(View.GONE);
+			        
+			        txtViewHeaderNoData.setVisibility(View.GONE);
+					
+					Utilities.showToast(ForumsDetailsActivity.this, "Reply successfully posted");
+					initCommentDialog();
+					
+				} else if(result == 5) {
+					SidraPulseApp.getInstance().accessTokenChange(ForumsDetailsActivity.this);
+					
+				}  else {
+					Utilities.showToast(ForumsDetailsActivity.this, "Reply not posted, try again");
+				}
+			}
+			
+		}, 2);
+		
+		//Execute Task
+		if (InternetConnectivity.isConnectedToInternet(ForumsDetailsActivity.this)) {
+			imageUpload.execute(ConstantValues.FUNC_ID_FORUM_COMMENT, selectedImagePath, Integer.toString(SidraPulseApp.getInstance().getForumsInfoList().get(position).getId()), comments, videoUrl);
+		} else {
+			SidraPulseApp.getInstance().openDialogForInternetChecking(ForumsDetailsActivity.this);
+		}
+		
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		
+		if (ConstantValues.wasScreenOn) {
+            System.out.println("SCREEN TURNED OFF");
+            return;
+        }
+		
+		if(isBackPressed) {
+			ConstantValues.isForumDetailClicked = true;
+		} else {
+			ConstantValues.isForumDetailClicked = false;
+			ConstantValues.FORUM_TAB_SELECTED_INDEX = 1;
+		}
+		
+		if (isIntentOpen) {
+			return;
+		}
+		
+		finish();
+		
+	}
+	
+	@Override
+	protected void onDestroy() {
+		selectedImagePath = "";
+		super.onDestroy();
+	}
+	
+}

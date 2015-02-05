@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relative_announcements_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/read_text"
+    android:paddingBottom="10dip" >
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dip"
+        android:layout_marginRight="10dip"
+        android:layout_marginTop="10dip"
+        android:layout_toLeftOf="@+id/img_view_announcements_type"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:minLines="2"
+        android:textColor="@color/color_title"
+        android:textSize="@dimen/id_pass_size"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txt_view_title"
+        android:layout_below="@+id/txt_view_title"
+        android:layout_marginTop="15dip"
+        android:maxLines="1"
+        android:textColor="@color/date_gray"
+        android:textSize="@dimen/date_size"
+        customview:fontName="ProximaNova-Regular.otf" />
+
+    <ImageView
+        android:id="@+id/img_view_announcements_type"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/txt_view_date"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dip" />
+
+</RelativeLayout>

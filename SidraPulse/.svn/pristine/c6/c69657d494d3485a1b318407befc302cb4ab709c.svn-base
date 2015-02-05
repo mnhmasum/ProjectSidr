@@ -1,0 +1,200 @@
+package com.atomix.adapter;
+
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+
+import android.app.ActionBar.LayoutParams;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.text.util.Linkify;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.atomix.datamodel.ForumsInfo;
+import com.atomix.interfacecallback.UnReadRequest;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.atomix.sidrapulse.R;
+import com.atomix.synctask.DeleteTask;
+import com.atomix.utils.Utilities;
+
+public class ForumsAdapter extends BaseAdapter {
+
+	private ArrayList<ForumsInfo> forumsInfoList;
+	private LayoutInflater mInflater;
+	private Context context;
+	private Activity activity;
+	private Dialog dialogConfirmation;
+	private Button dialogBtnYes;
+	private Button dialogBtnNo;
+	private TextView dialogMsg;
+	private boolean isHashTagDetails;
+	private String newActivityURL;
+
+	public ForumsAdapter(Activity activity, Context context, ArrayList<ForumsInfo> forumsInfoList) {
+		this.activity = activity;
+		this.context = context;
+		this.forumsInfoList = forumsInfoList;
+		this.isHashTagDetails = isHashTagDetails;
+	}
+
+	@Override
+	public int getCount() {
+		if(forumsInfoList != null) {
+			return forumsInfoList.size();
+		} else {
+			return 0;
+		}
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return forumsInfoList.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(final int position, View convertView, ViewGroup parent) {
+
+		ViewHolder holder;
+		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		if (convertView == null) {
+			convertView = mInflater.inflate(R.layout.forums_row, null);
+
+			holder = new ViewHolder();
+
+			holder.txtViewTitle = (TextView) convertView.findViewById(R.id.txt_view_title);
+			holder.txtViewDate = (TextView) convertView.findViewById(R.id.txt_view_date);
+			holder.txtViewPostOwner = (TextView) convertView.findViewById(R.id.txt_view_post_owner);
+			holder.txtViewTotalComments = (TextView) convertView.findViewById(R.id.txt_view_replies_count);
+			holder.imgViewDelete = (ImageView) convertView.findViewById(R.id.img_view_delete);
+			holder.imgViewDelete.setTag(position);
+			holder.relativeBg = (RelativeLayout) convertView.findViewById(R.id.relative_bg);
+			holder.relativeBg.setTag(position);
+
+			convertView.setTag(holder);
+
+		} else {
+			holder = (ViewHolder) convertView.getTag();
+		}
+		
+		String replyLabel = null;
+		holder.txtViewTitle.setText(forumsInfoList.get(position).getText());
+		holder.txtViewDate.setText(forumsInfoList.get(position).getCreatedAt());
+		
+		if(forumsInfoList.get(position).getTotalComments() > 1 ) {
+			replyLabel = "Replies";
+		} else {
+			replyLabel = "Reply";
+		}
+		holder.txtViewTotalComments.setText(forumsInfoList.get(position).getTotalComments() + " " + replyLabel );
+		//Linkify.addLinks(holder.txtViewTitle, Linkify.ALL);
+		
+		Pattern tagMatcher = Pattern.compile("[#]+[A-Za-z0-9-_]+\\b");
+		//holder.txtViewTitle.setMovementMethod(TextViewFixTouchConsume.LocalLinkMovementMethod.getInstance());
+		holder.txtViewTitle.setMovementMethod(null);
+		//holder.txtViewTitle.setClickable(false);
+		newActivityURL = "atomix://com.atomix.sidrapulse.ForumHashTagDetails/";
+		
+        Linkify.addLinks(holder.txtViewTitle, tagMatcher, newActivityURL);
+        holder.txtViewTitle.setLinkTextColor(context.getResources().getColor(R.color.hash_tag_color));
+        Utilities.stripUnderlines(holder.txtViewTitle);
+
+		if(forumsInfoList.get(position).getCreatedBy() == SidraPulseApp.getInstance().getUserInfo().getUserID()) {
+		//	holder.relativeBg.setBackgroundResource(R.drawable.sf_text_holdar_green);
+			holder.relativeBg.setBackgroundResource(R.drawable.holder_shape);
+			holder.txtViewPostOwner.setText("You");
+			holder.imgViewDelete.setVisibility(View.VISIBLE);
+			holder.txtViewPostOwner.setTextColor(context.getResources().getColor(R.color.green));
+		} else {
+			holder.relativeBg.setBackgroundResource(R.drawable.holder_shape);
+			holder.imgViewDelete.setVisibility(View.INVISIBLE);
+			holder.txtViewPostOwner.setText(forumsInfoList.get(position).getAuthorInfo().getName());
+			holder.txtViewPostOwner.setTextColor(context.getResources().getColor(R.color.cyan));
+		}
+		
+		holder.imgViewDelete.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+
+				final int index = ((Integer) v.getTag());
+				dialogConfirmation = new Dialog(activity);
+				dialogConfirmation.requestWindowFeature(Window.FEATURE_NO_TITLE);
+				dialogConfirmation.setContentView(R.layout.confirm_delete_dialog);
+				dialogConfirmation.setCanceledOnTouchOutside(true);
+				dialogConfirmation.setCancelable(true);
+
+				dialogConfirmation.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+				dialogConfirmation.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+				dialogMsg = (TextView) dialogConfirmation.findViewById(R.id.txt_view_dialog_message);
+				dialogMsg.setText("Are you sure to delete your forum post?");
+				dialogBtnYes = (Button) dialogConfirmation.findViewById(R.id.btn_yes);
+				dialogBtnNo = (Button) dialogConfirmation.findViewById(R.id.btn_no);
+
+				dialogBtnYes.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						if (InternetConnectivity.isConnectedToInternet(activity)) {
+							
+						} else {
+							SidraPulseApp.getInstance().openDialogForInternetChecking(activity);
+						}
+						
+						new DeleteTask(activity, new UnReadRequest() {
+							@Override
+							public void onTaskCompleted(int status) {
+								dialogConfirmation.dismiss();
+								if(status == 1){
+									SidraPulseApp.getInstance().getForumsInfoList().remove(index);
+									ForumsAdapter.this.notifyDataSetChanged();
+								}
+								else{
+									Utilities.showToast(context, ConstantValues.failureMessage);
+								}
+							}
+						}, "7", Integer.toString(SidraPulseApp.getInstance().getForumsInfoList().get(index).getId())).execute();
+					}
+				});
+
+				dialogBtnNo.setOnClickListener(new OnClickListener() {
+					public void onClick(View v) {
+						dialogConfirmation.dismiss();
+					}
+				});
+
+				dialogConfirmation.show();
+
+			}
+
+		});
+		
+		return convertView;
+	}
+
+	static class ViewHolder {
+		TextView txtViewTitle;
+		TextView txtViewPostOwner;
+		TextView txtViewDate;
+		TextView txtViewTotalComments;
+		ImageView imgViewDelete;
+		RelativeLayout relativeBg;
+	}
+	
+	
+}

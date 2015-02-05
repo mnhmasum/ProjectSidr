@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical|center_horizontal"
+    android:background="@drawable/holder_shape"
+    android:padding="5dip" >
+
+    <ImageView
+        android:id="@+id/img_view_select"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/img_view_select"
+        android:layout_alignTop="@+id/img_view_select"
+        android:background="@drawable/cancel_btn" />
+
+</RelativeLayout>

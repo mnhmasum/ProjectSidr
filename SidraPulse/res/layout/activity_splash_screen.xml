@@ -1,0 +1,35 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/sp_bg" >
+
+    <ImageView
+        android:id="@+id/img_view_logo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/sidra_logo" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/img_view_logo"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textColor="@color/white"
+        android:textSize="40sp"
+        customview:fontName="ProximaNova-Regular.otf" />
+
+    <ImageView
+        android:id="@+id/img_view_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_view_app_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dip" />
+
+</RelativeLayout>

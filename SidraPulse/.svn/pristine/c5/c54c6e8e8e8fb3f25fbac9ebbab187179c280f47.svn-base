@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relative_forum_comments"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="3dp"
+    android:paddingTop="10dip" >
+
+    <RelativeLayout
+        android:id="@+id/relative_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@color/comments_bg_color"
+        android:paddingBottom="5dp" >
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/margin_top_left"
+            android:layout_marginTop="@dimen/margin_top_left"
+            android:maxLines="3"
+            android:text="Ahmed Al Qudir"
+            android:textColor="@color/color_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            customview:fontName="ProximaNova-Semibold.otf" />
+
+        <ImageView
+            android:id="@+id/img_view_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/txt_view_name"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/delete_icon"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/txt_view_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/txt_view_name"
+            android:layout_below="@+id/txt_view_name"
+            android:layout_marginTop="2dip"
+            android:text="on Saturday April 10, 2014 13:55"
+            android:textColor="@color/light_gray"
+            android:textSize="12sp" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/txt_view_date"
+            android:layout_alignRight="@+id/txt_view_readmore"
+            android:layout_below="@+id/txt_view_date"
+            android:layout_marginTop="10dp"
+            android:text="Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, "
+            android:textColor="@color/color_title"
+            customview:fontName="ProximaNova-Regular.otf" />
+
+        <TextView
+            android:id="@+id/txt_view_readmore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/txt_view_comments"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="More"
+            android:textColor="@color/blue"
+            android:textSize="18sp"
+            android:visibility="gone" />
+
+        <RelativeLayout
+            android:id="@+id/linear_link_preview_holder"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_below="@+id/txt_view_readmore"
+            android:layout_margin="10dp"
+            android:background="@drawable/description_holdar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="5dp" >
+
+            <ImageView
+                android:id="@+id/img_view_select"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_alignParentLeft="true"
+                android:padding="3dp"
+                android:scaleType="centerCrop" />
+
+            <Button
+                android:id="@+id/btn_cancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/cancel_btn"
+                android:visibility="invisible" />
+
+            <TextView
+                android:id="@+id/txt_view_link_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/img_view_select"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@+id/img_view_select"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_view_link_Description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txt_view_link_title"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@+id/img_view_select"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text=""
+                android:textColor="@color/date_gray" />
+
+            <TextView
+                android:id="@+id/txt_view_link_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/img_view_select"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@+id/img_view_select"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="@color/holo_blue_dark"
+                android:textStyle="normal" />
+
+            <ImageView
+                android:id="@+id/img_view_clickable"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/img_view_select"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/no_image" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_image_holder"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_below="@+id/linear_link_preview_holder"
+            android:layout_margin="5dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:visibility="visible" >
+
+            <ImageView
+                android:id="@+id/img_view_photo_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_video_holder"
+            android:layout_width="match_parent"
+            android:layout_height="290dp"
+            android:layout_below="@+id/linear_image_holder"
+            android:layout_margin="10dp"
+            android:background="@drawable/description_holdar"
+            android:gravity="center_horizontal|center_vertical"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:visibility="gone" >
+
+            <WebView
+                android:id="@+id/web_view_player"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

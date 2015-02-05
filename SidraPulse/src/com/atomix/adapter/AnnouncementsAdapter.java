@@ -1,0 +1,97 @@
+package com.atomix.adapter;
+
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.atomix.datamodel.AnnouncementsInfo;
+import com.atomix.sidrapulse.R;
+
+public class AnnouncementsAdapter extends BaseAdapter {
+
+	private ArrayList<AnnouncementsInfo> announcementsInfoList;
+	private LayoutInflater mInflater;
+	private Context context;
+
+	public AnnouncementsAdapter(Context context, ArrayList<AnnouncementsInfo> announcementsInfoList) {
+		this.context = context;
+		this.announcementsInfoList = announcementsInfoList;
+	}
+
+	@Override
+	public int getCount() {
+		if(announcementsInfoList != null) {
+			return announcementsInfoList.size();
+		} else {
+			return 0;
+		}
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return announcementsInfoList.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+
+		ViewHolder holder;
+		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		if (convertView == null) {
+			convertView = mInflater.inflate(R.layout.announcements_row, null);
+
+			holder = new ViewHolder();
+
+			holder.txtViewTitle = (TextView) convertView.findViewById(R.id.txt_view_title);
+			holder.txtViewDate = (TextView) convertView.findViewById(R.id.txt_view_date);
+			holder.btnType = (ImageView) convertView.findViewById(R.id.img_view_announcements_type);
+			holder.relativeBg = (RelativeLayout) convertView.findViewById(R.id.relative_announcements_row);
+			convertView.setTag(holder);
+
+		} else {
+			holder = (ViewHolder) convertView.getTag();
+		}
+		
+		holder.txtViewTitle.setText(announcementsInfoList.get(position).getTitle());
+		holder.txtViewDate.setText(announcementsInfoList.get(position).getDate());
+		
+		if("OAM".equalsIgnoreCase(announcementsInfoList.get(position).getType())) {
+			holder.btnType.setBackgroundResource(R.drawable.oam_btn);
+		} else if("CEMC".equalsIgnoreCase(announcementsInfoList.get(position).getType())) {
+			holder.btnType.setBackgroundResource(R.drawable.cemc);
+		} else if("FLASH".equalsIgnoreCase(announcementsInfoList.get(position).getType())) {
+			holder.btnType.setBackgroundResource(R.drawable.flash_btn);
+		}
+		
+		if(announcementsInfoList.get(position).getReadStatus() == 0) {
+			holder.relativeBg.setBackgroundColor(Color.parseColor("#D0DDE0"));
+		} else {
+			holder.relativeBg.setBackgroundColor(Color.WHITE);
+		}
+
+		return convertView;
+	}
+
+	static class ViewHolder {
+		TextView txtViewTitle;
+		TextView txtViewDate;
+		ImageView btnType;
+		RelativeLayout relativeBg;
+	}
+
+}

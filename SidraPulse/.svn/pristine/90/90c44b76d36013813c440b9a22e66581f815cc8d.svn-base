@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/image_holdar" >
+
+        <ImageView
+            android:id="@+id/img_view_gallery_single"
+            android:layout_width="145dip"
+            android:layout_height="145dip"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dip"
+            android:background="@drawable/no_image"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/img_view_shade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/img_view_gallery_single"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/image_shade" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_content_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/img_view_shade"
+            android:layout_alignLeft="@+id/img_view_gallery_single"
+            android:layout_marginBottom="5dip"
+            android:layout_marginLeft="5dp"
+            android:maxLines="1"
+            android:textSize="12sp"
+            customview:fontName="ProximaNova-Regular.otf" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/txt_view_content_number"
+            android:layout_alignLeft="@+id/txt_view_content_number"
+            android:layout_marginBottom="5dip"
+            android:maxLines="1"
+            android:textSize="14sp"
+            customview:fontName="ProximaNova-Regular.otf" />
+    </RelativeLayout>
+
+</RelativeLayout>

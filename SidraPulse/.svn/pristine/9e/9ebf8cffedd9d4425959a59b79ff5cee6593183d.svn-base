@@ -1,0 +1,177 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_bg" >
+
+    <RelativeLayout
+        android:id="@+id/relative_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/top_bar" >
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/back_btn" />
+
+        <Button
+            android:id="@+id/btn_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/menu_btn"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_menu"
+            android:layout_toRightOf="@+id/btn_back"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/title_activity_staff_directory"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                customview:fontName="ProximaNova-Regular.otf" />
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                customview:fontName="ProximaNova-Regular.otf" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relative_top"
+        android:background="@drawable/btn_holdar"
+        android:gravity="center" >
+
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/radio_btn_browse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/browse_btn_on"
+                android:checked="true" >
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/radio_btn_saved_contacts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/saved_btn_off" />
+        </RadioGroup>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/bottom_bar"
+        android:gravity="center" >
+
+        <RelativeLayout
+            android:id="@+id/relative_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true" >
+
+            <Button
+                android:id="@+id/btn_search"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/search_icon" />
+
+            <com.atomix.customview.SidraButton
+                android:id="@+id/ed_txt_search_all_departments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/btn_search"
+                android:background="@drawable/search_text_holdar"
+                android:ems="10"
+                android:gravity="left|center"
+                android:hint="@string/search_within_department"
+                android:imeOptions="actionDone"
+                android:inputType="textPersonName"
+                android:paddingLeft="3dip"
+                android:paddingRight="5dip"
+                customview:fontName="ProximaNova-Regular.otf" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <com.handmark.pulltorefresh.library.PullToRefreshExpandableListView
+        xmlns:ptr="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/ex_lst_view_staff_directory_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relative_bottom"
+        android:layout_below="@+id/relativeLayout1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dip"
+        android:childDivider="@android:color/transparent"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:groupIndicator="@android:color/transparent"
+        android:listSelector="@null"
+        android:scrollbars="none"
+        android:showDividers="none"
+        ptr:ptrHeaderBackground="@android:color/darker_gray"
+        ptr:ptrHeaderTextColor="@android:color/white"
+        ptr:ptrMode="both" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_empty_saved_contact"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relative_bottom"
+        android:layout_below="@+id/relativeLayout1"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:gravity="center"
+        android:listSelector="@android:color/transparent"
+        android:text="@string/saved_dept_contact_is_empty"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        customview:fontName="ProximaNova-Regular.otf" />
+
+</RelativeLayout>

@@ -1,0 +1,125 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relative_main_menu"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_bg"
+    android:paddingBottom="5dip" >
+
+    <RelativeLayout
+        android:id="@+id/relative_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/top_bar" >
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/back_btn" />
+
+        <Button
+            android:id="@+id/btn_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/setting_btn" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_setting"
+            android:layout_toRightOf="@+id/btn_back"
+            android:gravity="center"
+            android:text="@string/title_activity_announcement"
+            android:textColor="@color/white"
+            android:textSize="@dimen/title_size"
+            customview:fontName="ProximaNova-Regular.otf" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relative_top"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dip"
+        android:gravity="center" >
+
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_icon" />
+
+        <com.atomix.customview.SidraEditText
+            android:id="@+id/ed_txt_search_directory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/btn_search"
+            android:background="@drawable/search_text_holdar"
+            android:ems="10"
+            android:focusableInTouchMode="true"
+            android:hint="Search Directory"
+            android:imeOptions="actionSearch"
+            android:inputType="textPersonName"
+            android:paddingLeft="3dip"
+            android:paddingRight="5dip"
+            android:textColorHint="#CCCCCC"
+            customview:fontName="ProximaNova-Regular.otf" />
+    </RelativeLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relative_indicator"
+        android:layout_alignLeft="@+id/relative_search"
+        android:layout_alignRight="@+id/relative_search"
+        android:layout_below="@+id/relative_search"
+        android:layout_margin="0dp"
+        android:background="@color/gray"
+        android:padding="0dp"
+        android:scrollbars="none" />
+
+    <RelativeLayout
+        android:id="@+id/relative_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btn_share_sidra_forum"
+        android:layout_marginBottom="5dip"
+        android:layout_marginTop="3dp"
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/img_view_page_indicator1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="2dp"
+            android:src="@drawable/circle_selected" />
+
+        <ImageView
+            android:id="@+id/img_view_page_indicator2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_toRightOf="@+id/img_view_page_indicator1"
+            android:src="@drawable/circle" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/btn_share_sidra_forum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/share_sidra_forum_btn" />
+
+</RelativeLayout>

@@ -1,0 +1,166 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relative_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    tools:context=".MainActivity" >
+
+    <RelativeLayout
+        android:id="@+id/relative_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/top_bar" >
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/back_btn" />
+
+        <Button
+            android:id="@+id/btn_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/menu_btn" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_menu"
+            android:layout_toRightOf="@+id/btn_back"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_activity_forums_new_post"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                customview:fontName="ProximaNova-Regular.otf" />
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_hash_tag_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:visibility="visible"
+                customview:fontName="ProximaNova-Regular.otf" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/edt_txt_description_main"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_below="@+id/relative_top"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:background="#FFFFFF"
+        android:ems="10"
+        android:gravity="top"
+        android:hint="Type here"
+        android:padding="10dp" >
+
+        <requestFocus />
+    </EditText>
+
+    <HorizontalScrollView
+        android:id="@+id/horizontal_scrool_view_image_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/horizontal_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/edt_txt_description_main"
+        android:padding="10dip"
+        android:scrollbars="none" >
+
+        <LinearLayout
+            android:id="@+id/linear_img_add"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal" >
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <ImageView
+        android:id="@+id/horizontal_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relative_bottom"
+        android:layout_marginLeft="@dimen/margin_top_left"
+        android:layout_marginRight="@dimen/margin_top_left"
+        android:background="@drawable/popup_dot_line" />
+
+    <RelativeLayout
+        android:id="@+id/relative_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/dp_5"
+        android:gravity="center" >
+
+        <Button
+            android:id="@+id/btn_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/margin_top_left"
+            android:background="@drawable/sf_cam_btn" />
+
+        <Button
+            android:id="@+id/btn_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/margin_top_left"
+            android:background="@drawable/btn_send_selector"
+            android:gravity="center_vertical"
+            android:padding="5dp"
+            android:textColor="@color/blue"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txt_view_character_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            android:layout_toLeftOf="@+id/btn_send"
+            android:text="@string/forum_character_limit"
+            android:textColor="@color/date_gray"
+            android:textSize="@dimen/id_pass_size" />
+
+        <TextView
+            android:id="@+id/txt_view_hints"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="5dp"
+            android:layout_toLeftOf="@+id/txt_view_character_count"
+            android:layout_toRightOf="@+id/btn_add"
+            android:gravity="center_horizontal"
+            android:text="@string/forum_post_hints_text"
+            android:textColor="@color/date_gray"
+            android:textSize="@dimen/forum_post_hints" />
+    </RelativeLayout>
+
+</RelativeLayout>

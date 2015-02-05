@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#FFFFFF"
+    android:padding="10dip" >
+
+    <ImageView
+        android:id="@+id/img_view_select"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="5dp"
+        android:scaleType="centerCrop" />
+
+    <Button
+        android:id="@+id/btn_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/img_view_select"
+        android:background="@drawable/cancel_btn" />
+
+    <TextView
+        android:id="@+id/txt_view_link_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/btn_cancel"
+        android:layout_toRightOf="@+id/img_view_select"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text=""
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txt_view_link_Description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/txt_view_link_title"
+        android:layout_below="@+id/txt_view_link_title"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:singleLine="false"
+        android:text=""
+        android:textColor="@color/color_title" />
+
+    <TextView
+        android:id="@+id/txt_view_link_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/txt_view_link_Description"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/img_view_select"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:text=""
+        android:textColor="@color/blue"
+        android:textStyle="italic" />
+
+    <Button
+        android:id="@+id/btn_post_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/txt_view_link_url"
+        android:layout_marginTop="5dp"
+        android:text="Post" />
+
+</RelativeLayout>

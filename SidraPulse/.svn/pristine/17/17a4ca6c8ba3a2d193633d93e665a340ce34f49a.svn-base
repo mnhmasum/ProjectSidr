@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="10dip" >
+
+    <RelativeLayout
+        android:id="@+id/relative_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/class_text_holdar" >
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="@dimen/margin_top_left"
+            android:layout_marginRight="@dimen/margin_top_left"
+            android:layout_marginTop="10dip"
+            android:layout_toLeftOf="@+id/img_view_label"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:text="TextView"
+            android:textColor="@color/black_gray"
+            android:textSize="@dimen/id_pass_size"
+            customview:fontName="ProximaNova-Semibold.otf" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/txt_view_title"
+            android:layout_below="@+id/txt_view_title"
+            android:layout_marginTop="5dp"
+            android:text="TextView"
+            android:textColor="@color/red"
+            customview:fontName="ProximaNova-Semibold.otf" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/txt_view_date"
+            android:layout_below="@+id/txt_view_date"
+            android:layout_marginTop="5dp"
+            android:text="@string/posted_by"
+            customview:fontName="ProximaNova-Semibold.otf" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_post_owner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/textView1"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="@dimen/margin_top_left"
+            android:layout_toRightOf="@+id/textView1"
+            android:maxLines="1"
+            android:text="TextView"
+            customview:fontName="ProximaNova-Semibold.otf" />
+
+        <ImageView
+            android:id="@+id/img_view_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txt_view_post_owner"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/margin_top_left"
+            android:background="@drawable/delete_icon"
+            android:visibility="invisible" />
+
+        <View
+            android:id="@+id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="0.3dp"
+            android:layout_alignLeft="@+id/textView1"
+            android:layout_below="@+id/img_view_delete"
+            android:layout_marginRight="@dimen/margin_top_left"
+            android:layout_marginTop="10dip"
+            android:background="#E1E4E8"
+            android:visibility="visible" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/txt_view_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textView1"
+            android:layout_below="@+id/imageView2"
+            android:layout_marginRight="@dimen/margin_top_left"
+            android:layout_marginTop="10dip"
+            android:maxLines="3"
+            android:text="TextView"
+            customview:fontName="ProximaNova-Semibold.otf" />
+
+        <ImageView
+            android:id="@+id/img_view_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@+id/img_view_delete"
+            android:layout_alignTop="@+id/txt_view_title"
+            android:padding="4dp" />
+    </RelativeLayout>
+
+</RelativeLayout>

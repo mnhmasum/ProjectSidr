@@ -1,0 +1,101 @@
+package com.atomix.sidrapulse;
+
+import java.lang.reflect.InvocationTargetException;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings.PluginState;
+import android.webkit.WebView;
+
+public class VideoPlayerActivity extends Activity {
+
+	WebView webViewPlayer;
+
+	@SuppressLint("SetJavaScriptEnabled")
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_video_player);
+		
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		int mwidth = displaymetrics.widthPixels / 100 * 80;
+		int height = displaymetrics.heightPixels / 100 * 35;
+		String iframe = getIntent().getExtras().getString("iframe");
+	    
+		if (!iframe.contains("http://")) {
+			iframe = iframe.replace("//player","http://player");
+		}
+		
+	    Log.i("Replaced Text","=> " + iframe);
+		//position = getIntent().getExtras().getInt("position", 0);
+
+		String html = "<!DOCTYPE html><meta name = \"viewport\" content = \"initial-scale = 1.0, user-scalable = no, width = " + mwidth
+				 	  + "\" /><html><head><style>body{margin:0px;padding:0px}iframe{width:"+ mwidth +"px; height:" + height + "px; padding:5px; background-color:#FFFFFF} player{width:40px}</style></head><body>" + iframe + "</body></html>";
+		
+		String mime = "text/html";
+		String encoding = "utf-8";
+
+		
+		webViewPlayer = (WebView) findViewById(R.id.web_view_player);
+		webViewPlayer.getSettings().setLoadWithOverviewMode(true);
+		webViewPlayer.getSettings().setUseWideViewPort(true);
+		webViewPlayer.setInitialScale(60);
+		// webview.getSettings().setSupportZoom(false);
+		webViewPlayer.getSettings().setBuiltInZoomControls(false);
+		webViewPlayer.getSettings().setDisplayZoomControls(false);
+		webViewPlayer.getSettings().setJavaScriptEnabled(true);
+		
+		webViewPlayer.getSettings().setAppCacheEnabled(true);
+		webViewPlayer.getSettings().setDomStorageEnabled(true);
+		webViewPlayer.getSettings().setSaveFormData(true);
+		//webViewPlayer.getSettings().setBuiltInZoomControls(true);
+		webViewPlayer.getSettings().setPluginState(PluginState.ON);
+		
+		webViewPlayer.setWebChromeClient(new WebChromeClient());
+		
+		webViewPlayer.getSettings().setUserAgentString("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/534.36 (KHTML, like Gecko) Chrome/13.0.766.0 Safari/534.36");
+		
+		webViewPlayer.loadDataWithBaseURL(null, html, mime, encoding, null);
+
+	}
+
+	@Override
+	protected void onPause() {
+		try {
+        Class.forName("android.webkit.WebView").getMethod("onPause", (Class[]) null).invoke(webViewPlayer, (Object[]) null);
+
+	    } catch(ClassNotFoundException cnfe) {
+	    	
+	    } catch(NoSuchMethodException nsme) {
+	    
+	    } catch(InvocationTargetException ite) {
+	    
+	    } catch (IllegalAccessException iae) {
+	    
+	    }
+		
+		super.onPause();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		try {
+	        Class.forName("android.webkit.WebView").getMethod("onPause", (Class[]) null).invoke(webViewPlayer, (Object[]) null);
+
+		    } catch(ClassNotFoundException cnfe) {
+		    	
+		    } catch(NoSuchMethodException nsme) {
+		    
+		    } catch(InvocationTargetException ite) {
+		    
+		    } catch (IllegalAccessException iae) {
+		    
+		    }
+		super.onDestroy();
+	}
+}

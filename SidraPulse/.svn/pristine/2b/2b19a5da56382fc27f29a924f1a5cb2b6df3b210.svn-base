@@ -1,0 +1,278 @@
+package com.atomix.sidrapulse;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnGroupExpandListener;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+
+import com.atomix.adapter.StaffDirectoryItemExpandableAdapter;
+import com.atomix.customview.SidraCustomProgressDialog;
+import com.atomix.datamodel.StaffListInfo;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.jsonparse.CommunicationLayer;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.handmark.pulltorefresh.library.PullToRefreshExpandableListView;
+
+public class StaffDirectorySearchActivity extends Activity implements OnGroupExpandListener, OnClickListener, TextWatcher {
+
+	private Button btnBack;
+	private Button btnMenu;
+	private Button btnSearch;
+	private EditText edTxtSearch;
+	private ExpandableListView exLstViewSearch;
+	private ImageView imgViewSearchCancel;
+	private TextView txtViewSearchResult;
+	private RelativeLayout relativeMain;
+	private TextView txtViewMatchingResult;
+	private TextView txtViewEmptyContact;
+	private PullToRefreshExpandableListView edListView;
+
+	private int lastExpandedPosition = -1;
+	
+	private ArrayList<StaffListInfo> parentItems;
+	private ArrayList<StaffListInfo> childItems;
+	
+	private ProgressDialog progressDialog;
+	private int searchStatus;
+	
+	private boolean isAll;
+	private int position;
+	private String keyword = "";
+	private boolean isMainPage;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_staff_directory_search);
+		
+		initViews();
+		setListener();
+		loadData();
+		//edTxtSearch.requestFocus(); 
+	}
+
+	private void initViews() {
+		relativeMain = (RelativeLayout) findViewById(R.id.relative_main);
+		btnBack = (Button) findViewById(R.id.btn_back);
+		btnMenu = (Button) findViewById(R.id.btn_menu);
+		btnSearch = (Button) findViewById(R.id.btn_search);
+		edTxtSearch = (EditText) findViewById(R.id.ed_txt_search);
+		exLstViewSearch = (ExpandableListView) findViewById(R.id.ex_lst_view_staff_directory_search);
+		imgViewSearchCancel = (ImageView) findViewById(R.id.img_view_search_cancel);
+		txtViewSearchResult = (TextView) findViewById(R.id.txt_view_search_result);
+		txtViewMatchingResult = (TextView) findViewById(R.id.txt_view_matching_result);
+	}
+
+	private void setListener() {
+		relativeMain.setOnClickListener(this);
+		btnBack.setOnClickListener(this);
+		btnMenu.setOnClickListener(this);
+		btnSearch.setOnClickListener(this);
+		exLstViewSearch.setOnGroupExpandListener(this);
+		imgViewSearchCancel.setOnClickListener(this);
+		edTxtSearch.addTextChangedListener(this);
+		
+		edTxtSearch.setOnEditorActionListener(new OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				if(edTxtSearch.getText().toString().trim().length() > 0) {
+					keyword = edTxtSearch.getText().toString().trim();
+					SidraPulseApp.getInstance().hideKeyboard(StaffDirectorySearchActivity.this, v);
+					keyword = edTxtSearch.getText().toString().trim();
+					if (InternetConnectivity.isConnectedToInternet(StaffDirectorySearchActivity.this)) {
+						new StaffDirectorySearchApiTask(edTxtSearch.getText().toString().trim()).execute();
+					} else {
+						SidraPulseApp.getInstance().openDialogForInternetChecking(StaffDirectorySearchActivity.this);
+					}
+					
+				}
+				return true;
+			}
+	    });
+		
+	}
+
+	private void loadData() {
+		if(getIntent().getExtras() != null) {
+			isAll = getIntent().getExtras().getBoolean("is_all");
+			position = getIntent().getExtras().getInt("position");
+			keyword = getIntent().getExtras().getString("keyword");
+			isMainPage = getIntent().getExtras().getBoolean("isMainPage");
+			if (isMainPage) {
+				new StaffDirectorySearchApiTask(getIntent().getExtras().getString("keyword")).execute();
+			}
+			
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_back:
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			onBackPressed();
+			break;
+			
+		case R.id.btn_search:
+			SidraPulseApp.getInstance().hideKeyboard(StaffDirectorySearchActivity.this, v);
+			if(edTxtSearch.getText().toString().trim().length() > 0) {
+				keyword = edTxtSearch.getText().toString();
+				if (InternetConnectivity.isConnectedToInternet(StaffDirectorySearchActivity.this)) {
+					new StaffDirectorySearchApiTask(edTxtSearch.getText().toString().trim()).execute();
+				} else {
+					SidraPulseApp.getInstance().openDialogForInternetChecking(StaffDirectorySearchActivity.this);
+				}
+			}
+			
+		case R.id.img_view_search_cancel:
+			edTxtSearch.setText("");
+			imgViewSearchCancel.setVisibility(View.GONE);
+			break;
+			
+		case R.id.relative_main:
+			//SidraPulseApp.getInstance().hideKeyboard(getApplicationContext(), v);
+			break;
+			
+		case R.id.btn_menu:
+			startActivity(new Intent(StaffDirectorySearchActivity.this, MainMenuActivity.class));
+			finish();
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void onGroupExpand(int groupPosition) {
+		if (lastExpandedPosition != -1 && groupPosition != lastExpandedPosition) {
+			exLstViewSearch.collapseGroup(lastExpandedPosition);
+		}
+		lastExpandedPosition = groupPosition;
+	}
+	
+	private class StaffDirectorySearchApiTask extends AsyncTask<Void, Void, Void> {
+		String searchKeyword;
+		public StaffDirectorySearchApiTask(String searchKeyword) {
+			this.searchKeyword = searchKeyword;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			progressDialog = SidraCustomProgressDialog.creator(StaffDirectorySearchActivity.this);
+		}
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			try {
+				if(isAll) {
+					searchStatus = CommunicationLayer.getStaffSearchData(ConstantValues.FUNC_ID_STAFF_SEARCH, Integer.toString(SidraPulseApp.getInstance().getUserInfo().getUserID()), SidraPulseApp.getInstance().getUserInfo().getAccessToken(), "0", searchKeyword);
+				Log.e("I am in here background", "++++");
+				} else {
+					searchStatus = CommunicationLayer.getStaffSearchData(ConstantValues.FUNC_ID_STAFF_SEARCH, Integer.toString(SidraPulseApp.getInstance().getUserInfo().getUserID()), SidraPulseApp.getInstance().getUserInfo().getAccessToken(), Integer.toString(SidraPulseApp.getInstance().getDirectoryDepartmentsInfoList().get(position).getId()), searchKeyword);
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			if(progressDialog.isShowing()) {
+				Log.e("I am in here background", "--");
+				progressDialog.dismiss();
+			}
+			exLstViewSearch.setVisibility(View.GONE);
+			txtViewSearchResult.setVisibility(View.GONE);
+			txtViewMatchingResult.setVisibility(View.GONE);
+			if(searchStatus == 1) {
+				if(SidraPulseApp.getInstance().getStaffListInfoList() != null) {
+					parentItems = new ArrayList<StaffListInfo>();
+					childItems = new ArrayList<StaffListInfo>();
+					exLstViewSearch.setVisibility(View.VISIBLE);
+					txtViewMatchingResult.setVisibility(View.VISIBLE);
+					txtViewMatchingResult.setText(+SidraPulseApp.getInstance().getStaffListInfoList().size()+" Results matching  " + "\n\"" + keyword +"\"");
+					
+					for(int i = 0; i < SidraPulseApp.getInstance().getStaffListInfoList().size(); i++) {
+						StaffListInfo info = new StaffListInfo();
+						info.setId(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getId());
+						info.setName(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getName());
+						info.setDesignation(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getDesignation());
+						info.setDepartment(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getDepartment());
+						info.setIsBookmarked(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getIsBookmarked());
+						parentItems.add(info);
+						
+						StaffListInfo info1 = new StaffListInfo();
+						info1.setEmail(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getEmail());
+						info1.setOffice(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getOffice());
+						info1.setMobile(SidraPulseApp.getInstance().getStaffListInfoList().get(i).getMobile());
+						childItems.add(info1);
+					}
+					
+					exLstViewSearch.setAdapter(new StaffDirectoryItemExpandableAdapter(getApplicationContext(), StaffDirectorySearchActivity.this, parentItems, null, childItems, false, txtViewEmptyContact, edListView));
+					exLstViewSearch.setIndicatorBounds(0, 0);
+				} else {
+					txtViewSearchResult.setVisibility(View.VISIBLE);
+				}
+			} else if(searchStatus == 5) {
+				SidraPulseApp.getInstance().accessTokenChange(StaffDirectorySearchActivity.this);
+				
+			} else {
+				txtViewSearchResult.setVisibility(View.VISIBLE);
+			}
+			edTxtSearch.setText(keyword);
+			imgViewSearchCancel.setVisibility(View.VISIBLE);
+			edTxtSearch.setSelection(edTxtSearch.getText().toString().length());
+			
+		}
+	}
+	
+	@Override
+	protected void onResume() {
+		overridePendingTransition( R.anim.slide_in_up, R.anim.slide_out_bottom);
+		super.onResume();
+	}
+	
+	@Override
+	public void afterTextChanged(Editable s) {
+		if(edTxtSearch.getText().toString().trim().length() > 0) {
+			imgViewSearchCancel.setVisibility(View.VISIBLE);
+		} else {
+			imgViewSearchCancel.setVisibility(View.GONE);
+		}
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		
+	}
+
+}

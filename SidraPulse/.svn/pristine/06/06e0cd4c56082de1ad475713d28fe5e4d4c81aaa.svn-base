@@ -1,0 +1,131 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_bg" >
+
+    <RelativeLayout
+        android:id="@+id/relative_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/top_bar" >
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/back_btn" />
+
+        <Button
+            android:id="@+id/btn_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/menu_btn"
+            android:visibility="invisible" />
+
+        <com.atomix.customview.SidraTextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_menu"
+            android:layout_toRightOf="@+id/btn_back"
+            android:gravity="center"
+           	android:text="@string/title_activity_announcement"
+            android:textColor="@color/white"
+            android:textSize="@dimen/title_size"
+            customview:fontName="ProximaNova-Regular.otf" />
+
+        <Button
+            android:id="@+id/btn_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/menu_btn"
+            android:visibility="visible" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relative_top"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="@dimen/margin_top_left"
+        android:background="@drawable/announcements_text_holdar"
+        android:paddingTop="5dp" >
+
+        <LinearLayout
+            android:id="@+id/relative_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:orientation="vertical" >
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_top_left"
+                android:layout_marginRight="@dimen/margin_top_left"
+                android:layout_marginTop="@dimen/margin_top_left"
+                android:ellipsize="end"
+                android:textColor="@color/cyan"
+                android:textSize="@dimen/id_pass_size"
+                customview:fontName="ProximaNova-Bold.otf" />
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_top_left"
+                android:layout_marginRight="@dimen/margin_top_left"
+                android:layout_marginTop="@dimen/margin_top_left"
+                android:textColor="@color/red"
+                android:textSize="@dimen/type_date_size"
+                customview:fontName="ProximaNova-Semibold.otf" />
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_date_time"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_top_left"
+                android:textColor="@color/red"
+                android:textSize="@dimen/type_date_size"
+                customview:fontName="ProximaNova-Semibold.otf" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <com.atomix.customview.SidraTextView
+                    android:id="@+id/txt_view_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_top_left"
+                    android:layout_marginRight="@dimen/margin_top_left"
+                    android:layout_marginTop="@dimen/margin_top_left"
+                    android:paddingBottom="10dp"
+                    android:scrollbars="vertical"
+                    android:textColor="@color/color_title"
+                    android:textSize="@dimen/id_pass_size"
+                    customview:fontName="ProximaNova-Semibold.otf" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

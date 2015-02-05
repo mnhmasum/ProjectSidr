@@ -1,0 +1,290 @@
+package com.atomix.utils;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.ParseException;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.URLSpan;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.atomix.customview.SidraTextView;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrapulse.R;
+
+@SuppressLint("SimpleDateFormat")
+public class Utilities {
+	
+	public static String dateConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("EEEE MMMMM d, yyyy");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	public static String timeConversion(String time) throws java.text.ParseException{
+		
+		String created_at = time;
+		
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedTime = new SimpleDateFormat("HH:mm");
+			
+			String shortTimeStr = formatedTime.format(fullDate);
+			
+			return shortTimeStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	public static String offerPromotionDateConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("d MMMMM, yyyy");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	public static String eventDayConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("EEE");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	
+	public static String eventDateConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("d");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	public static String getNowDay(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("d");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+		
+	public static String getDate(String selectedDate) {
+		String DataYear[] = selectedDate.trim().split(" ");
+		String month = "00";
+
+		for (int i = 0; i < ConstantValues.MONTHS.length; i++) {
+			if (ConstantValues.MONTHS[i].equalsIgnoreCase(DataYear[0])) {
+				month = ConstantValues.MONTHS_NUMBER[i];
+			} else {
+
+			}
+		}
+
+		return DataYear[1] + "-" + month;
+	}
+	
+	
+	public static String eventFullDateConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("MMMMM d, yyyy");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	public static String eventSpinnerDateConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("MMMMM yyyy");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+	
+	public static void showToast(Context context, String msg) {
+		
+		LayoutInflater inflater = LayoutInflater.from(context);
+		final View item = inflater.inflate(R.layout.custom_toast_view, null);
+		
+		SidraTextView txtViewMsg = (SidraTextView) item.findViewById(R.id.txt_view_msg);
+		txtViewMsg.setTextSize(context.getResources().getDimension(R.dimen.custom_toast_size));
+		txtViewMsg.setText(msg);
+
+		Toast toast = new Toast(context);
+		toast.setView(item);
+		toast.setGravity(Gravity.CENTER, 0, 50);
+		toast.show();
+
+	}
+	
+	public static String eventReminderDateConvertion(String dt) throws java.text.ParseException{
+		
+		String created_at = dt;
+		try {
+			SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+			Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+			TimeZone tz = cal.getTimeZone();
+		
+			toFullDate.setTimeZone(tz);
+			Date fullDate = toFullDate.parse(created_at);
+
+			SimpleDateFormat formatedDate = new SimpleDateFormat("d M yyyy h m s a");
+	
+			String shortDateStr = formatedDate.format(fullDate);
+			
+			return shortDateStr;
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return "00:00:00";
+		}
+	}
+	
+    public static void stripUnderlines(TextView textView) {
+          Spannable s = new SpannableString (textView.getText());
+          URLSpan[] spans = s.getSpans(0, s.length(), URLSpan.class);
+          for (URLSpan span: spans) {
+              int start = s.getSpanStart(span);
+              int end = s.getSpanEnd(span);
+              s.removeSpan(span);
+              span = new URLSpanNoUnderline(span.getURL());
+              s.setSpan(span, start, end, 0);
+          }
+          textView.setText(s);
+      }
+	
+}

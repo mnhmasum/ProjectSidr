@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:paddingTop="10dip" >
+
+    <RelativeLayout
+        android:id="@+id/relative_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/sf_text_holdar" >
+
+        <TextView
+            android:id="@+id/txt_view_total_hot_topics"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/txt_view_tag"
+            android:layout_below="@+id/txt_view_tag" />
+
+        <TextView
+            android:id="@+id/textview1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/txt_view_total_hot_topics"
+            android:layout_alignBottom="@+id/txt_view_total_hot_topics"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/txt_view_total_hot_topics"
+            android:text="Conversation on this topic" />
+
+        <TextView
+            android:id="@+id/txt_view_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txt_view_no"
+            android:layout_marginLeft="14dp"
+            android:layout_marginRight="14dp"
+            android:layout_marginTop="@dimen/margin_top_left"
+            android:layout_toRightOf="@+id/txt_view_no"
+            android:ellipsize="end"
+            android:ems="10"
+            android:maxLines="2"
+            android:minLines="2"
+            android:text="asjfsjdfskl"
+            android:textIsSelectable="false" />
+
+        <TextView
+            android:id="@+id/txt_view_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="@dimen/margin_top_left"
+            android:text="01"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+    </RelativeLayout>
+
+</RelativeLayout>

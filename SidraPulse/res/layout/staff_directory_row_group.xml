@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:paddingBottom="5dp"
+    android:paddingTop="10dp" >
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/margin_top_left"
+        android:maxLines="1"
+        android:textColor="@color/black_gray"
+        android:textSize="@dimen/id_pass_size"
+        android:textStyle="bold"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_designation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/txt_view_name"
+        android:layout_marginLeft="@dimen/margin_top_left"
+        android:layout_marginTop="5dip"
+        android:maxLines="1"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_department"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/txt_view_designation"
+        android:layout_marginLeft="@dimen/margin_top_left"
+        android:layout_marginTop="5dip"
+        android:maxLines="1"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <ImageView
+        android:id="@+id/img_view_favoriate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/margin_top_left"
+        android:background="@drawable/star_gray_icon" />
+
+    <!--
+         <ImageView
+        android:id="@+id/img_view_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/margin_top_left"
+        android:layout_marginRight="@dimen/margin_top_left"
+        android:layout_marginTop="10dp"
+        android:background="@color/light_gray" />
+    -->
+
+</RelativeLayout>

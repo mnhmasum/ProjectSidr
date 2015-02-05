@@ -1,0 +1,156 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/login_bg" >
+
+    <RelativeLayout
+        android:id="@+id/relative_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/top_bar" >
+
+        <Button
+            android:id="@+id/btn_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/back_btn" />
+
+        <Button
+            android:id="@+id/btn_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/menu_btn"
+            android:visibility="invisible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_menu"
+            android:layout_toRightOf="@+id/btn_back"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/title_activity_classifieds"
+                android:textColor="@color/white"
+                android:gravity="center"
+                android:textSize="22sp"
+                customview:fontName="ProximaNova-Regular.otf" />
+
+            <com.atomix.customview.SidraTextView
+                android:id="@+id/txt_view_subTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                customview:fontName="ProximaNova-Regular.otf" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relative_top"
+        android:background="@drawable/btn_holdar"
+        android:gravity="center" >
+
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/radio_btn_all_classifieds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/all_classifieds_btn_blue"
+                android:checked="true" >
+            </RadioButton>
+
+            <RadioButton
+                android:id="@+id/radio_btn_posted_by_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@drawable/posted_btn_white" />
+        </RadioGroup>
+    </RelativeLayout>
+
+    <Spinner
+        android:id="@+id/spinner_classified_categories"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relativeLayout1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dip"
+        android:background="@drawable/dropdown_holdar"
+        android:listSelector="@android:color/transparent"
+        android:padding="2dip"
+        android:scrollbars="none"
+        android:spinnerMode="dropdown" />
+
+    <RelativeLayout
+        android:id="@+id/relative_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/bottom_bar"
+        android:gravity="center" >
+
+        <Button
+            android:id="@+id/btn_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/post_classified_btn" />
+    </RelativeLayout>
+
+    <com.handmark.pulltorefresh.library.PullToRefreshListView
+        android:id="@+id/lst_view_classified"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/relative_bottom"
+        android:layout_alignLeft="@+id/spinner_classified_categories"
+        android:layout_alignRight="@+id/spinner_classified_categories"
+        android:layout_below="@+id/spinner_classified_categories"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dip"
+        android:divider="@android:color/transparent"
+        android:listSelector="@android:color/transparent"
+        android:scrollbars="none" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_empty_list"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/relative_bottom"
+        android:layout_below="@+id/spinner_classified_categories"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:text="@string/saved_contact_is_empty"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        customview:fontName="ProximaNova-Regular.otf" />
+
+</RelativeLayout>

@@ -1,0 +1,314 @@
+package com.atomix.sidrapulse;
+
+import java.util.ArrayList;
+
+import android.app.ExpandableListActivity;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ExpandableListView.OnGroupExpandListener;
+import android.widget.TextView;
+
+import com.atomix.adapter.HumanResourceExpandableAdapter;
+import com.atomix.customview.SidraCustomProgressDialog;
+import com.atomix.datamodel.HumanResourceInfo;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.jsonparse.CommunicationLayer;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener2;
+import com.handmark.pulltorefresh.library.PullToRefreshExpandableListView;
+
+public class HumanResourceDetailsActivity extends ExpandableListActivity implements OnClickListener, OnGroupExpandListener, OnChildClickListener {
+
+	private Button btnBack;
+	private Button btnMenu;
+	private TextView txtViewTitle;
+	private PullToRefreshExpandableListView exLstViewHumanResource;
+	private int humanResourceStatus;
+	private ProgressDialog progressDialog;
+	private int lastExpandedPosition = -1;
+	
+	private ArrayList<HumanResourceInfo> parentItems;
+	private ArrayList<HumanResourceInfo> childItems;
+	private TextView txtViewEmptyList;
+	private HumanResourceExpandableAdapter humanResourceExpandableAdapter;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_human_resource_details);
+		
+		initViews();
+		setListener();
+		loadData();
+	}
+
+	private void initViews() {
+		txtViewEmptyList = (TextView) findViewById(R.id.txt_view_empty_list);
+		txtViewEmptyList.setText(getResources().getString(R.string.empty_list));
+		txtViewEmptyList.setVisibility(View.INVISIBLE);
+		btnBack = (Button) findViewById(R.id.btn_back);
+		btnMenu = (Button) findViewById(R.id.btn_menu);
+		txtViewTitle = (TextView) findViewById(R.id.txt_view_title);
+		exLstViewHumanResource = (PullToRefreshExpandableListView) findViewById(R.id.ex_lst_view_human_resource);
+		getExpandableListView().setGroupIndicator(null);
+	}
+
+	private void setListener() {
+		btnBack.setOnClickListener(this);
+		btnMenu.setOnClickListener(this);
+		getExpandableListView().setOnGroupExpandListener(this);
+		getExpandableListView().setOnChildClickListener(this);
+		
+		exLstViewHumanResource.setOnRefreshListener(new OnRefreshListener2 <ExpandableListView>() {
+
+			@Override
+			public void onPullDownToRefresh(PullToRefreshBase<ExpandableListView> refreshView) {
+				//Code for pull to up refresh
+				if (!InternetConnectivity.isConnectedToInternet(HumanResourceDetailsActivity.this)) {
+					SidraPulseApp.getInstance().openDialogForInternetChecking(HumanResourceDetailsActivity.this);
+					//adapter.notifyDataSetChanged();
+					exLstViewHumanResource.onRefreshComplete();
+					return;
+				} 
+				
+				if (SidraPulseApp.getInstance().getHumanResourceInfoList() == null) {
+					exLstViewHumanResource.onRefreshComplete();
+					return;
+				}
+				
+				new GetDataTask("0").execute();
+			}
+
+			@Override
+			public void onPullUpToRefresh(PullToRefreshBase<ExpandableListView> refreshView) {
+				
+				if (!InternetConnectivity.isConnectedToInternet(HumanResourceDetailsActivity.this)) {
+					SidraPulseApp.getInstance().openDialogForInternetChecking(HumanResourceDetailsActivity.this);
+					//adapter.notifyDataSetChanged();
+					exLstViewHumanResource.onRefreshComplete();
+					return;
+				} 
+				
+				if (SidraPulseApp.getInstance().getHumanResourceInfoList() == null) {
+					exLstViewHumanResource.onRefreshComplete();
+					return;
+				}
+				
+				new GetDataTask("1").execute();
+				
+			}
+
+		});
+		
+	}
+
+	private void loadData() {
+		
+		humanResourceExpandableAdapter = new HumanResourceExpandableAdapter(HumanResourceDetailsActivity.this, HumanResourceDetailsActivity.this, parentItems, null, childItems);
+		
+		if(getIntent().getExtras() != null) {
+			txtViewTitle.setText("FAQs");
+			if (InternetConnectivity.isConnectedToInternet(HumanResourceDetailsActivity.this)) {
+				new HumanResourceDetailsApiTask().execute();
+			} else {
+				SidraPulseApp.getInstance().openDialogForInternetChecking(HumanResourceDetailsActivity.this);
+			}
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_back:
+			onBackPressed();
+			break;
+			
+		case R.id.btn_menu:
+			startActivity(new Intent(HumanResourceDetailsActivity.this, MainMenuActivity.class));
+			finish();
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	@Override
+	public boolean onChildClick(ExpandableListView parent, View v,int groupPosition, int childPosition, long id) {
+
+		// get the group header
+		// HeaderInfo headerInfo = deptList.get(groupPosition);
+		// //get the child info
+		// DetailInfo detailInfo =
+		// headerInfo.getProductList().get(childPosition);
+		// //display it or do something with it
+		// Toast.makeText(getBaseContext(), "Clicked on Detail " +
+		// headerInfo.getName()
+		// + "/" + detailInfo.getName(), Toast.LENGTH_LONG).show();
+		getExpandableListView().collapseGroup(lastExpandedPosition);
+	    Log.e("CLICKED_CHOILD", "OOKKKK");
+		return false;
+	}
+	
+	
+	
+
+	@Override
+	public void onGroupExpand(int groupPosition) {
+		if (lastExpandedPosition != -1 && groupPosition != lastExpandedPosition) {
+			getExpandableListView().collapseGroup(lastExpandedPosition);
+		}
+		lastExpandedPosition = groupPosition;
+	}
+	
+	
+	private class HumanResourceDetailsApiTask extends AsyncTask<Void, Void, Void> {
+		@Override
+		protected void onPreExecute() {
+			progressDialog = SidraCustomProgressDialog.creator(HumanResourceDetailsActivity.this);
+		}
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			try {
+				
+				humanResourceStatus = CommunicationLayer.getHumanResourcesCategory(ConstantValues.FUNC_ID_HUMAN_RESOURCES_LIST, Integer.toString(SidraPulseApp.getInstance().getUserInfo().getUserID()), SidraPulseApp.getInstance().getUserInfo().getAccessToken(), "1", false, "", "");
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {	
+			if(progressDialog.isShowing()) {
+				progressDialog.dismiss();
+			}
+			
+			if(humanResourceStatus == 1) {
+				if(SidraPulseApp.getInstance().getHumanResourceInfoList() != null) {
+					parentItems = new ArrayList<HumanResourceInfo>();
+					childItems = new ArrayList<HumanResourceInfo>();
+					
+					for(int i = 0; i < SidraPulseApp.getInstance().getHumanResourceInfoList().size(); i++) {
+						HumanResourceInfo info = new HumanResourceInfo();
+						info.setQuestion(SidraPulseApp.getInstance().getHumanResourceInfoList().get(i).getQuestion());
+						parentItems.add(info);
+						
+						HumanResourceInfo info1 = new HumanResourceInfo();
+						info1.setAnswer(SidraPulseApp.getInstance().getHumanResourceInfoList().get(i).getAnswer());
+						childItems.add(info1);
+					}
+					txtViewEmptyList.setVisibility(View.INVISIBLE);
+					exLstViewHumanResource.setVisibility(View.VISIBLE);
+					humanResourceExpandableAdapter = new HumanResourceExpandableAdapter(HumanResourceDetailsActivity.this, HumanResourceDetailsActivity.this, parentItems, null, childItems);
+					setListAdapter(humanResourceExpandableAdapter);
+					//exLstViewHumanResource.setAdapter(new HumanResourceExpandableAdapter(HumanResourceDetailsActivity.this, HumanResourceDetailsActivity.this, parentItems, null, childItems));
+					//exLstViewHumanResource.setIndicatorBounds(exLstViewHumanResource.getRight() - 120, exLstViewHumanResource.getWidth() - 10);
+				} else {
+					txtViewEmptyList.setVisibility(View.VISIBLE);
+					exLstViewHumanResource.setVisibility(View.INVISIBLE);
+				}
+			} else if(humanResourceStatus == 5) {
+				SidraPulseApp.getInstance().accessTokenChange(HumanResourceDetailsActivity.this);
+				
+			} else {
+				txtViewEmptyList.setVisibility(View.VISIBLE);
+				exLstViewHumanResource.setVisibility(View.INVISIBLE);
+			}
+			
+		}
+	}
+	
+	private class GetDataTask extends AsyncTask<String, Void, String[]> {
+		
+		private String direction = null;
+		
+		public GetDataTask(String direction) {
+			this.direction = direction; 
+		}
+		
+		@Override
+		protected String[] doInBackground(String... params) {
+			
+			try {
+				if (this.direction.equals("0")) {
+					String element_id = Integer.toString(SidraPulseApp.getInstance().getHumanResourceInfoList().get(0).getId());
+					humanResourceStatus = CommunicationLayer.getHumanResourcesCategory(ConstantValues.FUNC_ID_HUMAN_RESOURCES_LIST, Integer.toString(SidraPulseApp.getInstance().getUserInfo().getUserID()), SidraPulseApp.getInstance().getUserInfo().getAccessToken(), "1", false, element_id, this.direction);
+				} else if (ConstantValues.PullDownActive) {
+					String element_id = Integer.toString(SidraPulseApp.getInstance().getHumanResourceInfoList().get(SidraPulseApp.getInstance().getHumanResourceInfoList().size() - 1).getId());
+					humanResourceStatus = CommunicationLayer.getHumanResourcesCategory(ConstantValues.FUNC_ID_HUMAN_RESOURCES_LIST, Integer.toString(SidraPulseApp.getInstance().getUserInfo().getUserID()), SidraPulseApp.getInstance().getUserInfo().getAccessToken(), "1", false, element_id, this.direction);
+				}
+				
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String[] result) {
+			if(humanResourceStatus == 1) {
+				if(SidraPulseApp.getInstance().getHumanResourceInfoList() != null) {
+					parentItems = new ArrayList<HumanResourceInfo>();
+					childItems = new ArrayList<HumanResourceInfo>();
+					
+					Log.i("FAQ FEED", "***" +  SidraPulseApp.getInstance().getHumanResourceInfoList().size());
+					
+					for(int i = 0; i < SidraPulseApp.getInstance().getHumanResourceInfoList().size(); i++) {
+						
+						HumanResourceInfo info = new HumanResourceInfo();
+						info.setQuestion(SidraPulseApp.getInstance().getHumanResourceInfoList().get(i).getQuestion());
+						parentItems.add(info);
+						
+						HumanResourceInfo info1 = new HumanResourceInfo();
+						info1.setAnswer(SidraPulseApp.getInstance().getHumanResourceInfoList().get(i).getAnswer());
+						childItems.add(info1);
+					}
+					
+					humanResourceExpandableAdapter = new HumanResourceExpandableAdapter(HumanResourceDetailsActivity.this, HumanResourceDetailsActivity.this, parentItems, null, childItems);
+					setListAdapter(humanResourceExpandableAdapter);
+					
+					if("0".equals(direction)) {
+						
+					} else {
+						setSelectedGroup(SidraPulseApp.getInstance().getHumanResourceInfoList().size());
+					}
+					
+				} else {
+
+				}
+			} else if(humanResourceStatus == 5) {
+				SidraPulseApp.getInstance().accessTokenChange(HumanResourceDetailsActivity.this);
+				
+			} else {
+			
+			}
+			
+			exLstViewHumanResource.onRefreshComplete();
+			super.onPostExecute(result);
+			
+		}
+	}
+
+/*	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		// TODO Auto-generated method stub
+		Log.e("CLICKED_CHOILD", "OOKKKK");
+		getExpandableListView().collapseGroup(lastExpandedPosition);
+	}*/
+
+}

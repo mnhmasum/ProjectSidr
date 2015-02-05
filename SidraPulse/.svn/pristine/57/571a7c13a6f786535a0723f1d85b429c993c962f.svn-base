@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00000000" >
+
+    <RelativeLayout
+        android:id="@+id/relative"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/icon_holdar" >
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/img_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/relative"
+        android:layout_centerHorizontal="true" />
+
+    <RelativeLayout
+        android:id="@+id/linear_notification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/img_view"
+        android:layout_alignTop="@+id/img_view"
+        android:gravity="center"
+        android:visibility="visible" >
+
+        <ImageView
+            android:id="@+id/img_view_n_holder"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/number_holdar" >
+        </ImageView>
+
+        <TextView
+            android:id="@+id/txt_view_notification"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/relative"
+        android:layout_alignLeft="@+id/relative"
+        android:layout_alignRight="@+id/relative"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="25dp"
+        android:gravity="center_horizontal"
+        android:textColor="@color/menu_title_color"
+        android:textSize="17sp"
+        customview:fontName="ProximaNova-Regular.otf" />
+
+</RelativeLayout><!--
+      <TextView
+        android:id="@+id/txt_view_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/relative"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="25dp"
+        android:layout_alignRight="@+id/relative"
+        android:layout_alignLeft="@+id/relative"
+        android:textColor="@color/menu_title_color"
+        android:gravity="center_horizontal"
+        android:text="flsdajfls"
+        android:textSize="17sp" />
+-->
+

@@ -1,0 +1,278 @@
+package com.atomix.sidrapulse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.app.ActionBar.LayoutParams;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.util.Linkify;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.atomix.adapter.ViewPagerAdapter;
+import com.atomix.customview.SidraTextView;
+import com.atomix.interfacecallback.UnReadRequest;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.atomix.synctask.DeleteTask;
+import com.atomix.utils.Utilities;
+
+public class ClassifiedDetailsActivity extends Activity implements OnClickListener {
+	
+	private Button btnBack;
+	private Button btnMenu;
+	private SidraTextView txtViewTitle;
+	private SidraTextView txtViewDate;
+	private SidraTextView txtViewDescription;
+	private SidraTextView txtViewPostOwnerName;
+	private SidraTextView txtViewEmail;
+	private SidraTextView txtViewPhone;
+	private ImageView imgViewDelete;
+	private LinearLayout linearIndicatorLayout;
+	private int position;
+	private ViewPager viewPager;
+	private Dialog dialogConfirmation;
+	private Button dialogBtnYes;
+	private Button dialogBtnNo;
+	private TextView dialogMsg;
+	private boolean isPathLocal = false;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_classified_details);
+		
+		initViews();
+		setListener();
+		loadData();
+	}
+	
+	private void loadData() {
+		if(getIntent().getExtras() != null) {
+			position = getIntent().getExtras().getInt("click_position");
+	
+			txtViewTitle.setText(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getTitle());
+			txtViewDate.setText(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getCreatedAt());
+			txtViewDescription.setText(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getDescription());
+			txtViewEmail.setText(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getOwnerInfo().getEmail());
+			txtViewPhone.setText(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getOwnerInfo().getMobile());
+			
+			if(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getCreatedBy() == SidraPulseApp.getInstance().getUserInfo().getUserID()) {
+				imgViewDelete.setVisibility(View.VISIBLE);
+				txtViewPostOwnerName.setText("You");
+				txtViewPostOwnerName.setTextColor(getResources().getColor(R.color.green));
+			} else {
+				imgViewDelete.setVisibility(View.GONE);
+				txtViewPostOwnerName.setText(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getOwnerInfo().getName());
+				txtViewPostOwnerName.setTextColor(getResources().getColor(R.color.cyan));
+			}
+			
+			Linkify.addLinks(txtViewDescription, Linkify.ALL);
+			
+		}
+		
+		if(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getPhotoInfo() != null) {
+			
+		    for(int j = 0; j < SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getPhotoInfo().size(); j++) {
+		        ImageView image = new ImageView(ClassifiedDetailsActivity.this);
+		        image.setBackgroundResource(R.drawable.circle);
+		        image.setTag(j);
+		        linearIndicatorLayout.addView(image);
+		    }		
+		    linearIndicatorLayout.findViewWithTag(0).setBackgroundResource(R.drawable.circle_selected);
+    	 	
+			ArrayList<HashMap<String, String>> mediaList = new ArrayList<HashMap<String, String>>();
+			
+			for(int count = 0; count < SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getPhotoInfo().size(); count++) {
+				HashMap<String, String> map1 = new HashMap<String, String>();
+				map1.put("url", SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getPhotoInfo().get(count).getPhoto());
+				Log.e("Photo name", "----"+ SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getPhotoInfo().get(count).getPhoto());
+				mediaList.add(map1);
+			} 
+			
+			viewPager.setAdapter(new ViewPagerAdapter(ClassifiedDetailsActivity.this, mediaList, isPathLocal, true, 2));
+		}
+	}
+	
+	private void initViews() {
+		btnBack = (Button) findViewById(R.id.btn_back);
+		btnMenu = (Button) findViewById(R.id.btn_menu);
+		
+		linearIndicatorLayout = (LinearLayout) findViewById(R.id.linear_indicator);
+		
+		dialogConfirmation = new Dialog(this);
+		dialogConfirmation.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialogConfirmation.setContentView(R.layout.confirm_delete_dialog);
+		dialogConfirmation.setCanceledOnTouchOutside(true);
+		dialogConfirmation.setCancelable(true);
+
+		dialogConfirmation.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		dialogConfirmation.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+		
+		dialogMsg = (TextView) dialogConfirmation.findViewById(R.id.txt_view_dialog_message);
+		dialogMsg.setText("Are you sure you want to delete your classified?");
+		
+		dialogBtnYes = (Button) dialogConfirmation.findViewById(R.id.btn_yes);
+		dialogBtnNo = (Button) dialogConfirmation.findViewById(R.id.btn_no);
+		
+		txtViewTitle = (SidraTextView) findViewById(R.id.txt_view_title);
+		txtViewDate = (SidraTextView) findViewById(R.id.txt_view_date);
+		txtViewPostOwnerName = (SidraTextView) findViewById(R.id.txt_view_post_owner);
+		txtViewEmail = (SidraTextView) findViewById(R.id.txt_view_email);
+		txtViewPhone = (SidraTextView) findViewById(R.id.txt_view_phone);
+		txtViewDescription = (SidraTextView) findViewById(R.id.txt_view_description);
+		
+		imgViewDelete = (ImageView) findViewById(R.id.img_view_delete);
+		
+		viewPager = (ViewPager) findViewById(R.id.view_pager);
+	}
+
+	private void setListener() {
+		btnBack.setOnClickListener(this);
+		btnMenu.setOnClickListener(this);
+		txtViewEmail.setOnClickListener(this);
+		txtViewPhone.setOnClickListener(this);
+		imgViewDelete.setOnClickListener(this);
+		
+		dialogBtnYes.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogConfirmation.dismiss();
+				new DeleteTask(ClassifiedDetailsActivity.this, new UnReadRequest() {
+					@Override
+					public void onTaskCompleted(int status) {
+						finish();	
+						if (status ==1) {
+							SidraPulseApp.getInstance().getClassifiedInfoList().remove(position);
+						} else if(status == 5) {
+							SidraPulseApp.getInstance().accessTokenChange(ClassifiedDetailsActivity.this);
+						} else{
+							Utilities.showToast(ClassifiedDetailsActivity.this, ConstantValues.failureMessage);
+						}
+						
+					}
+				}, "3", Integer.toString(SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getId())).execute();
+			}
+		});
+		
+		dialogBtnNo.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogConfirmation.dismiss();
+			}
+		});
+		
+		viewPager.setOnPageChangeListener(new OnPageChangeListener() {
+	         
+	         @Override
+	         public void onPageSelected(int index) {
+	        	 	Log.d("Page", "**** onPageSelected = " + index);
+	        	 	
+	        	 	for(int count = 0; count < SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getPhotoInfo().size(); count++) {
+	        			
+	        	 	if (index == count) {
+	        	 		linearIndicatorLayout.findViewWithTag(count).setBackgroundResource(R.drawable.circle_selected);
+	        	 		
+	        	 	} else{
+	        	 		linearIndicatorLayout.findViewWithTag(count).setBackgroundResource(R.drawable.circle);
+	        	 	} 
+	        	 }
+	        	 	
+	         }
+
+	         @Override
+	         public void onPageScrolled(int arg0, float arg1, int arg2) {
+	        	 
+	         }
+	         
+	         @Override
+	         public void onPageScrollStateChanged(int arg0) {
+	        	 
+	         }
+	         
+	      });
+		
+	}
+	
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_back:
+			onBackPressed();
+			break;
+			
+		case R.id.btn_menu:
+			startActivity(new Intent(ClassifiedDetailsActivity.this, MainMenuActivity.class));
+			finish();
+			break;
+			
+		case R.id.txt_view_email:
+			Intent intent_email = new Intent(Intent.ACTION_SEND);
+			intent_email.setType("plain/text");
+			intent_email.putExtra(Intent.EXTRA_EMAIL, new String[] {txtViewEmail.getText().toString()});
+			intent_email.putExtra(Intent.EXTRA_SUBJECT, "RE: "+SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getTitle());
+			try {
+				startActivity(Intent.createChooser(intent_email, ""));
+			} catch (android.content.ActivityNotFoundException ex) {
+			    Toast.makeText(ClassifiedDetailsActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+			}
+			
+			break;
+			
+		case R.id.txt_view_phone:
+			Intent intent_phone = new Intent(Intent.ACTION_DIAL);
+			intent_phone.setData(Uri.parse("tel:"+ txtViewPhone.getText().toString()));
+			startActivity(intent_phone); 
+			break;
+			
+		case R.id.img_view_delete:
+			dialogConfirmation.show();
+					
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	@Override
+	public void startActivity(Intent intent) {
+		if(intent.getAction()!= null){
+		    if (intent.getAction().equalsIgnoreCase(Intent.ACTION_VIEW)) {
+		    	if(intent.getData().toString().startsWith("mailto")){ 
+			    	String emailId = intent.getData().toString().split(":")[1];
+			    	Intent intent_email = new Intent(Intent.ACTION_SEND);
+					intent_email.setType("plain/text");
+					intent_email.putExtra(Intent.EXTRA_EMAIL, new String[] {emailId});
+					intent_email.putExtra(Intent.EXTRA_SUBJECT, "RE: "+SidraPulseApp.getInstance().getClassifiedInfoList().get(position).getTitle());
+					try {
+						startActivity(Intent.createChooser(intent_email, ""));
+					} catch (android.content.ActivityNotFoundException ex) {
+					    Toast.makeText(ClassifiedDetailsActivity.this, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+					}
+		    	}
+		    	else{
+		    		super.startActivity(intent);
+		    	}
+		    }
+		    else {
+		        super.startActivity(intent);
+		    }
+		} else {
+			 super.startActivity(intent);
+		}
+	}
+			
+}
+	

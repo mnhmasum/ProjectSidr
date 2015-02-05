@@ -1,0 +1,408 @@
+package com.atomix.sidrapulse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.app.ActionBar.LayoutParams;
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.util.Linkify;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.atomix.adapter.ViewPagerAdapter;
+import com.atomix.customview.SidraTextView;
+import com.atomix.interfacecallback.OnImageUploadComplete;
+import com.atomix.interfacecallback.UnReadRequest;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.atomix.synctask.ClassifiedCreatePost;
+import com.atomix.synctask.UploadImageAsyncTask;
+import com.atomix.utils.Utilities;
+
+public class ClassifiedPreviewPost extends Activity implements OnClickListener{
+	
+	private SidraTextView txtViewTitle;
+	private SidraTextView txtViewDate;
+	private SidraTextView txtViewCategory;
+	private SidraTextView txtViewDescription;
+	private Button btnBack;
+	private Button btnMenu;
+	private Button btnEdit;
+	private Button btnPost;
+	private ViewPager viewPager;
+	private String previewTitle;
+	private String previewDate;
+	private String previewCategory;
+	private String previewDescription;
+	private Dialog dialogPostingSuccess;
+	private Dialog dialogConfirmNavigation;
+	private LinearLayout linearIndicatorLayout;
+	private int classifiedId = 0;
+	private int noOfPhotos;
+	private int photoUploadReminning = 0;
+	private ArrayList<String> uplodedPhotoNameArray;
+	private String allPhotoName = "";
+	private boolean isPathLocal = false;
+	private RelativeLayout relativeImageHolder;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_classified_preview_post);
+		
+		initViews();
+		setListener();
+		loadData();
+		//initPostNoticeUI();
+		initPostSuccessUI();
+		initConfirmNavigationUI();
+
+	}
+
+	private void loadData() {
+		
+		if(getIntent().getExtras() != null) {
+			classifiedId = getIntent().getExtras().getInt("CLASSIFIED_ID");
+			previewTitle = getIntent().getExtras().getString("TITLE");
+			previewDate = getIntent().getExtras().getString("DATE");
+			previewCategory = Integer.toString(SidraPulseApp.getInstance().getClassifiedCategoryInfoList().get(getIntent().getExtras().getInt("CATEGORY") - 1).getId());
+			previewDescription = getIntent().getExtras().getString("DESCRIPTION");
+			noOfPhotos = getIntent().getExtras().getInt("NO_OF_PHOTOS");
+			
+			photoUploadReminning = noOfPhotos;
+			
+			txtViewTitle.setText(previewTitle);
+			txtViewDate.setText(previewDate);
+			txtViewDescription.setText(previewDescription);
+			txtViewCategory.setText(SidraPulseApp.getInstance().getClassifiedCategoryInfoList().get(getIntent().getExtras().getInt("CATEGORY") - 1).getCategoryName());
+			
+			ArrayList<HashMap<String, String>> mediaList = new ArrayList<HashMap<String, String>>();
+//			Log.e("no of photos in preview", "---------"+noOfPhotos);
+//			for(int i=1; i<=noOfPhotos; i++)
+//				{
+//					Log.e("photo path", "----"+getIntent().getExtras().getString("PATHS"+i));
+//				}
+			
+		
+			if(noOfPhotos > 0)
+			{   relativeImageHolder.setVisibility(View.VISIBLE);
+				isPathLocal = true;
+				if(noOfPhotos > 1) {
+					for(int j = 0; j <noOfPhotos; j++) {
+					        ImageView image = new ImageView(ClassifiedPreviewPost.this);
+					        image.setBackgroundResource(R.drawable.circle);
+					        image.setTag(j);
+					        linearIndicatorLayout.addView(image);
+					    }		
+					    linearIndicatorLayout.findViewWithTag(0).setBackgroundResource(R.drawable.circle_selected);
+				}    
+				for(int i=1; i<=noOfPhotos; i++)
+				{
+					HashMap<String, String> map1 = new HashMap<String, String>();
+					map1.put("url", getIntent().getExtras().getString("PATHS"+i));
+					Log.e("photo path", "----"+getIntent().getExtras().getString("PATHS"+i));
+					mediaList.add(map1);
+				}
+				viewPager.setAdapter(new ViewPagerAdapter(ClassifiedPreviewPost.this, mediaList, isPathLocal, true, 2));
+			} else {
+				relativeImageHolder.setVisibility(View.GONE);
+			}
+			
+			Linkify.addLinks(txtViewTitle, Linkify.ALL);
+			Linkify.addLinks(txtViewDescription, Linkify.ALL);
+		}
+	}
+
+	private void setListener() {
+		btnBack.setOnClickListener(this);
+		btnMenu.setOnClickListener(this);
+		btnEdit.setOnClickListener(this);
+		btnPost.setOnClickListener(this);
+		
+		viewPager.setOnPageChangeListener(new OnPageChangeListener() {
+	         
+	         @Override
+	         public void onPageSelected(int index) {
+	        	 	Log.d("Page", "**** onPageSelected = " + index);
+	        	 	
+	        	 	for(int count = 0; count <noOfPhotos; count++) {
+	        	 	if (index == count) {
+	        	 		linearIndicatorLayout.findViewWithTag(count).setBackgroundResource(R.drawable.circle_selected);
+	        	 	} else{
+	        	 	linearIndicatorLayout.findViewWithTag(count).setBackgroundResource(R.drawable.circle);
+	        	 	} 
+	        	 }
+	         }
+
+	         @Override
+	         public void onPageScrolled(int arg0, float arg1, int arg2) {
+	        	 
+	         }
+	         
+	         @Override
+	         public void onPageScrollStateChanged(int arg0) {
+	        	 
+	         }
+	         
+	      });
+		
+	}
+
+	private void initViews() {
+		relativeImageHolder = (RelativeLayout) findViewById(R.id.relative_image_holder);
+		uplodedPhotoNameArray = new ArrayList<String>();
+		btnBack = (Button) findViewById(R.id.btn_back);
+		btnMenu = (Button) findViewById(R.id.btn_menu);
+		
+		txtViewTitle = (SidraTextView) findViewById(R.id.txt_view_title);
+		txtViewDate = (SidraTextView) findViewById(R.id.txt_view_date);
+		txtViewCategory = (SidraTextView) findViewById(R.id.txt_view_category_main);
+		txtViewDescription = (SidraTextView) findViewById(R.id.txt_view_description);
+		
+		linearIndicatorLayout = (LinearLayout) findViewById(R.id.linear_indicator);
+		
+		btnEdit = (Button) findViewById(R.id.btn_edit);
+		btnPost = (Button) findViewById(R.id.btn_post);
+		
+		viewPager = (ViewPager) findViewById(R.id.view_pager);
+		
+	}
+	
+	
+	private void initPostSuccessUI() {
+		dialogPostingSuccess = new Dialog(this);
+		dialogPostingSuccess.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialogPostingSuccess.setContentView(R.layout.post_success_dialog);
+		dialogPostingSuccess.setCanceledOnTouchOutside(false);
+		dialogPostingSuccess.setCancelable(false);
+		dialogPostingSuccess.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		dialogPostingSuccess.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+		
+		//final TextView txtViewTitle = (TextView) dialogPostingSuccess.findViewById(R.id.txt_view_title);
+		//Log.e("preview title is", ""+previewTitle);
+		//txtViewTitle.setText(previewTitle);
+
+		final Button btnOk = (Button) dialogPostingSuccess.findViewById(R.id.btnOk);
+		final Button btnClose = (Button) dialogPostingSuccess.findViewById(R.id.btn_close);
+		
+		btnClose.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogPostingSuccess.dismiss();
+			}
+		});
+		
+
+		btnOk.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Intent intent = new Intent(ClassifiedPreviewPost.this, ClassifiedsActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				dialogPostingSuccess.dismiss();
+				finish();
+			}
+		});
+	}
+	
+	private void initConfirmNavigationUI() {
+
+		dialogConfirmNavigation = new Dialog(this);
+		dialogConfirmNavigation.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialogConfirmNavigation.setContentView(R.layout.confirm_navigation_dialog);
+		dialogConfirmNavigation.setCanceledOnTouchOutside(true);
+		dialogConfirmNavigation.setCancelable(true);
+		dialogConfirmNavigation.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+		dialogConfirmNavigation.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+		final Button btnDiscard = (Button) dialogConfirmNavigation.findViewById(R.id.btnDiscard);
+		final Button btnClose = (Button) dialogConfirmNavigation.findViewById(R.id.btn_close);
+		final Button btnSaveDraft = (Button) dialogConfirmNavigation.findViewById(R.id.btnSaveDraft);
+		btnDiscard.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogConfirmNavigation.dismiss();
+				finish();
+			}
+		});
+		
+		btnClose.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogConfirmNavigation.dismiss();
+				finish();
+			}
+		});
+
+		btnSaveDraft.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialogConfirmNavigation.dismiss();
+				if(photoUploadReminning > 0 ){
+					for(int i = 1; i<=noOfPhotos; i++) {
+						if(getIntent().getExtras().getString("PATHS"+ i).startsWith("upload")){
+							String [] photoArray = getIntent().getExtras().getString("PATHS"+ i).split("/");
+							uplodedPhotoNameArray.add(photoArray[photoArray.length - 1]);
+							photoUploadReminning--;
+							if(i == noOfPhotos){
+								saveDraft();
+							}
+						}else{
+							uploadImage(getIntent().getExtras().getString("PATHS"+ i), true);
+						}
+				}
+			}else {
+				saveDraft();
+			}
+	}
+		});
+	}
+			
+			
+	private void saveDraft() {
+		if(uplodedPhotoNameArray != null && uplodedPhotoNameArray.size() > 0){
+			for(int i = 0 ; i<uplodedPhotoNameArray.size() ; i++){
+				if (allPhotoName.equals("")) {
+					allPhotoName = uplodedPhotoNameArray.get(i);
+				} else {
+					allPhotoName = allPhotoName + ","+ uplodedPhotoNameArray.get(i);
+				}
+			}
+		}
+			new ClassifiedCreatePost(ClassifiedPreviewPost.this, new UnReadRequest() {
+				@Override
+				public void onTaskCompleted(int status) {
+					if (status ==1){
+						Utilities.showToast(ClassifiedPreviewPost.this, "Draft Saved");
+						Intent intent = new Intent(ClassifiedPreviewPost.this, ClassifiedsActivity.class);
+						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+						finish();
+					} else{
+						Utilities.showToast(ClassifiedPreviewPost.this, ConstantValues.failureMessage);
+					}
+				}
+			}, previewCategory, previewTitle, previewDescription, allPhotoName, "1", classifiedId).execute();
+	
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_back:
+			onBackPressed();
+			break;
+			
+		case R.id.btn_menu:
+			startActivity(new Intent(ClassifiedPreviewPost.this, MainMenuActivity.class));
+			finish();
+			break;
+			
+		case R.id.btn_edit:
+			finish();
+			break;
+			
+		case R.id.btn_post:
+			if(photoUploadReminning > 0 ){
+					for(int i = 1; i<=noOfPhotos; i++) {
+					if(getIntent().getExtras().getString("PATHS"+ i).startsWith("upload")){
+						String [] photoArray = getIntent().getExtras().getString("PATHS"+ photoUploadReminning).split("/");
+						uplodedPhotoNameArray.add(photoArray[photoArray.length - 1]);
+						photoUploadReminning--;
+						if(i == photoUploadReminning){
+							postClassifieds();
+						}
+					}else{
+						uploadImage(getIntent().getExtras().getString("PATHS"+ i), false);
+					}
+				}
+			}else {
+				postClassifieds();
+			}
+	
+			break;
+
+		default:
+			break;
+		}
+		
+	}
+	
+	private void uploadImage(String photoPath, final boolean isDraft) {
+		if (InternetConnectivity.isConnectedToInternet(ClassifiedPreviewPost.this)) {
+			UploadImageAsyncTask imageUploadFromAlbum = new UploadImageAsyncTask(ClassifiedPreviewPost.this, new OnImageUploadComplete() {
+				
+					@Override
+					public void OnImageUploadComplete(String result) {
+						if(!"".equals(result))
+						{
+						try {
+							uplodedPhotoNameArray.add(result);
+							photoUploadReminning--;
+							if(isDraft){
+								if(photoUploadReminning == 0){
+									 saveDraft();
+								}
+							}else{
+								if(photoUploadReminning == 0){
+									postClassifieds();
+								}
+							}
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+					
+			}, true);
+						
+				imageUploadFromAlbum.execute(photoPath);
+			}else{
+					SidraPulseApp.getInstance().openDialogForInternetChecking(ClassifiedPreviewPost.this);
+				}
+			
+	}
+
+	protected void postClassifieds() {
+		if(uplodedPhotoNameArray != null && uplodedPhotoNameArray.size() > 0){
+			for(int i = 0 ; i<uplodedPhotoNameArray.size() ; i++){
+				if (allPhotoName.equals("")) {
+					allPhotoName = uplodedPhotoNameArray.get(i);
+				} else {
+					allPhotoName = allPhotoName + ","+ uplodedPhotoNameArray.get(i);
+				}
+			}
+		}
+		new ClassifiedCreatePost(ClassifiedPreviewPost.this, new UnReadRequest() {
+			@Override
+			public void onTaskCompleted(int status) {
+				if(status ==1){
+					btnBack.setEnabled(false);
+					btnBack.setAlpha(0.5f);
+					dialogPostingSuccess.show();
+				} else if(status == 5) {
+					SidraPulseApp.getInstance().accessTokenChange(ClassifiedPreviewPost.this);
+					
+				} else{
+					Utilities.showToast(ClassifiedPreviewPost.this, ConstantValues.failureMessage);
+				}
+			}
+		}, previewCategory, previewTitle, previewDescription, allPhotoName, "0", classifiedId).execute();
+		
+	}
+
+	@Override
+	public void onBackPressed() {
+		dialogConfirmNavigation.show();
+	}
+	
+}

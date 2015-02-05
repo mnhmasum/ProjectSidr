@@ -1,0 +1,58 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:customview="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/realtive_message_send_ui"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/cla_popup" >
+    </RelativeLayout>
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/relativeLayout1"
+        android:layout_alignTop="@+id/relativeLayout1"
+        android:layout_margin="10dp"
+        android:maxLines="1"
+        android:textColor="@color/dark_gray"
+        android:textSize="22sp"
+        android:text="Classified Posted"
+        customview:fontName="ProximaNova-Semibold.otf" />
+
+    <com.atomix.customview.SidraTextView
+        android:id="@+id/txt_view_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/relativeLayout1"
+        android:layout_below="@+id/txt_view_title"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:text="@string/post_success_message"
+        android:textColor="@color/date_gray"
+        android:textSize="18sp"
+        customview:fontName="ProximaNova-Regular.otf" />
+
+    <Button
+        android:id="@+id/btn_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/relativeLayout1"
+        android:layout_alignTop="@+id/relativeLayout1"
+        android:background="@drawable/cla_close_btn" />
+
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/relativeLayout1"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/cla_ok_success_btn" />
+
+</RelativeLayout>

@@ -1,0 +1,266 @@
+package com.atomix.adapter;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.atomix.datamodel.EventsInfo;
+import com.atomix.interfacecallback.UnReadRequest;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.notification.NotificationReceiver;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.atomix.sidrapulse.R;
+import com.atomix.synctask.FavoriateOrNotAsyncTask;
+import com.atomix.utils.Utilities;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
+
+public class EventAdapter extends BaseAdapter{
+
+	private ArrayList<EventsInfo> eventsInfoList;
+	private LayoutInflater mInflater;
+	private Context context;
+	private Activity activity;
+//	private boolean isPastEvent;
+	Calendar c = Calendar.getInstance();
+	public int time = c.get(Calendar.MINUTE)+1;
+	private int isTabType;
+	private PullToRefreshListView listViewEvents;
+	private TextView txtViewEmptyMsg;
+
+	public EventAdapter(Activity activity, Context context, ArrayList<EventsInfo> eventsInfoList, int isTabType, TextView txtViewEmptyMsg, PullToRefreshListView listViewEvents) {
+		this.context = context;
+		this.eventsInfoList = eventsInfoList;
+		this.activity = activity;
+		this.isTabType = isTabType;
+		this.txtViewEmptyMsg = txtViewEmptyMsg;
+		this.listViewEvents = listViewEvents;
+	}
+
+	@Override
+	public int getCount() {
+		if(eventsInfoList != null) {
+			return eventsInfoList.size();
+		} else {
+			return 0;
+		}
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return eventsInfoList.get(position);
+		
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+
+		final ViewHolder holder;
+		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		if (convertView == null) {
+			convertView = mInflater.inflate(R.layout.events_row, null);
+
+			holder = new ViewHolder();
+			holder.txtViewTitle = (TextView) convertView.findViewById(R.id.txt_view_title);
+			holder.txtViewVenue = (TextView) convertView.findViewById(R.id.txt_view_venue);
+			holder.txtViewDescription = (TextView) convertView.findViewById(R.id.txt_view_description);
+			holder.txtViewStartDate = (TextView) convertView.findViewById(R.id.txt_view_start_date);
+			holder.txtViewStartDay = (TextView) convertView.findViewById(R.id.txt_view_start_day);
+			holder.txtViewEndDate = (TextView) convertView.findViewById(R.id.txt_view_end_date);
+			holder.txtViewEndDay = (TextView) convertView.findViewById(R.id.txt_view_end_day);
+			holder.txtViewStartTime = (TextView) convertView.findViewById(R.id.txt_view_start_time);
+			holder.txtViewEndTime = (TextView) convertView.findViewById(R.id.txt_view_end_time);
+			holder.txtViewTo = (TextView) convertView.findViewById(R.id.txt_view1);
+			holder.imgViewFavoriate = (ImageView) convertView.findViewById(R.id.img_view_favoriate);
+			holder.imgViewFavoriate.setTag(position);
+			//findViewById(R.id.BtnToClick).setTag(position)
+			convertView.setTag(holder);
+
+		} else {
+			holder = (ViewHolder) convertView.getTag();
+		}
+		
+		holder.txtViewTitle.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEventTitle());
+		if(SidraPulseApp.getInstance().getEventsInfoList().get(position).getVanue() != null) {
+			holder.txtViewVenue.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getVanue());
+		} 
+		holder.txtViewDescription.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEventDescription());
+		holder.txtViewStartDate.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEventStartDate());
+		holder.txtViewStartDay.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEventStartDay());
+		holder.txtViewEndDate.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEventEndDate());
+		holder.txtViewEndDay.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEventEndDay());
+		holder.txtViewStartTime.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getStartTime());
+		holder.txtViewEndTime.setText(SidraPulseApp.getInstance().getEventsInfoList().get(position).getEndTime());
+		
+		if(eventsInfoList.get(position).getStartDate().equals(eventsInfoList.get(position).getEndDate())) {
+			holder.txtViewEndDate.setVisibility(View.GONE);
+			holder.txtViewEndDay.setVisibility(View.GONE);
+			holder.txtViewStartTime.setVisibility(View.VISIBLE);
+			holder.txtViewEndTime.setVisibility(View.VISIBLE);
+			holder.txtViewTo.setVisibility(View.VISIBLE);
+		} else {	
+			holder.txtViewStartTime.setVisibility(View.GONE);
+			holder.txtViewEndTime.setVisibility(View.GONE);
+			holder.txtViewTo.setVisibility(View.GONE);
+			holder.txtViewEndDate.setVisibility(View.VISIBLE);
+			holder.txtViewEndDay.setVisibility(View.VISIBLE);
+		}
+		
+		if(isTabType == 3) {
+			holder.imgViewFavoriate.setVisibility(View.INVISIBLE);
+		} else {
+			holder.imgViewFavoriate.setVisibility(View.VISIBLE);
+		}
+		
+		if(SidraPulseApp.getInstance().getEventsInfoList().get(position).getBookMarked() == 0) {
+			holder.imgViewFavoriate.setBackgroundResource(R.drawable.star_gray_icon) ;
+		}
+		else if(SidraPulseApp.getInstance().getEventsInfoList().get(position).getBookMarked() == 1) {
+			holder.imgViewFavoriate.setBackgroundResource(R.drawable.star_icon) ;
+		}			
+		
+		holder.imgViewFavoriate.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				final int index =((Integer) v.getTag());
+				if (InternetConnectivity.isConnectedToInternet(activity)) {
+					String id = Integer.toString(SidraPulseApp.getInstance().getEventsInfoList().get(index).getId());
+					final Intent myIntent = new Intent(context, NotificationReceiver.class);
+					if(SidraPulseApp.getInstance().getEventsInfoList().get(index).getBookMarked() == 0) {
+						SidraPulseApp.getInstance().getEventsInfoList().get(index).setBookMarked(1);
+						new FavoriateOrNotAsyncTask(activity, id, "1", ConstantValues.FUNC_ID_EVENT_MAKE_FAVOURITE, new UnReadRequest() {
+							@Override
+							public void onTaskCompleted(int status) {
+								if(status ==1){
+								holder.imgViewFavoriate.setBackgroundResource(R.drawable.star_icon);
+								Log.e("Event start day", "------------"+ SidraPulseApp.getInstance().getEventsInfoList().get(index).getStartDate());
+								Log.e("Event end day", "------------"+ SidraPulseApp.getInstance().getEventsInfoList().get(index).getEndDate());
+								
+								Calendar calendar = Calendar.getInstance();
+								// format : date month year hour minute second AM
+								String [] reminderDate = SidraPulseApp.getInstance().getEventsInfoList().get(index).getEventStartFullDate().split(" ");
+								if(SidraPulseApp.getInstance().getEventsInfoList().get(index).getStartDate().equalsIgnoreCase(SidraPulseApp.getInstance().getEventsInfoList().get(index).getEndDate())){
+									calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(reminderDate [0]));
+								    calendar.set(Calendar.MONTH, Integer.parseInt(reminderDate [1]) - 1);
+								    calendar.set(Calendar.YEAR, Integer.parseInt(reminderDate [2]));
+								    calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(reminderDate [3])-2);
+								    calendar.set(Calendar.MINUTE, Integer.parseInt(reminderDate [4]));
+								    calendar.set(Calendar.SECOND, Integer.parseInt(reminderDate [5]));
+								    if ( reminderDate [6].equalsIgnoreCase("AM")){
+								    calendar.set(Calendar.AM_PM, Calendar.AM);
+								    }else{
+								    	calendar.set(Calendar.AM_PM, Calendar.PM);
+								    }
+								}else{
+									calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(reminderDate [0]));
+								    calendar.set(Calendar.MONTH, Integer.parseInt(reminderDate [1]) - 1);
+								    calendar.set(Calendar.YEAR, Integer.parseInt(reminderDate [2]));
+								    calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(reminderDate [3])-2);
+								    calendar.set(Calendar.MINUTE, Integer.parseInt(reminderDate [4]));
+								    calendar.set(Calendar.SECOND, Integer.parseInt(reminderDate [5]));
+								    if ( reminderDate [6].equalsIgnoreCase("AM")){
+								    calendar.set(Calendar.AM_PM, Calendar.AM);
+								    }else{
+								    	calendar.set(Calendar.AM_PM, Calendar.PM);
+								    }
+								}		
+
+//						//	Demo test value 
+//							calendar.set(Calendar.DAY_OF_MONTH, 18);
+//						    calendar.set(Calendar.MONTH, 7 -1);
+//						    calendar.set(Calendar.YEAR, 2014);
+//						    calendar.set(Calendar.HOUR_OF_DAY, 11);
+//						    calendar.set(Calendar.MINUTE, time);
+//						    time = time + 2;
+//						    calendar.set(Calendar.SECOND, 0);
+//						    calendar.set(Calendar.AM_PM, Calendar.AM);
+						   
+						    myIntent.putExtra("EVENT_TITLE", SidraPulseApp.getInstance().getEventsInfoList().get(index).getEventTitle()+" starts at "+SidraPulseApp.getInstance().getEventsInfoList().get(index).getStartTime());
+						    myIntent.putExtra("EVENT_ID", SidraPulseApp.getInstance().getEventsInfoList().get(index).getId());
+						    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, SidraPulseApp.getInstance().getEventsInfoList().get(index).getId(), myIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+						    AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
+						    alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+						   
+							Utilities.showToast(context, activity.getResources().getString(R.string.toast_saved_events));
+						
+							}else{
+								Utilities.showToast(context, ConstantValues.failureMessage);
+							}	
+							
+							}
+					}).execute();
+					} else {
+						SidraPulseApp.getInstance().getEventsInfoList().get(index).setBookMarked(0);
+						new FavoriateOrNotAsyncTask(activity, id, "0", ConstantValues.FUNC_ID_EVENT_MAKE_FAVOURITE, new UnReadRequest() {
+							@Override
+							public void onTaskCompleted(int status) {
+								if(status ==1 ){
+									holder.imgViewFavoriate.setBackgroundResource(R.drawable.star_gray_icon);
+							
+								    PendingIntent pendingIntent = PendingIntent.getBroadcast(context, SidraPulseApp.getInstance().getEventsInfoList().get(index).getId(), myIntent,  PendingIntent.FLAG_CANCEL_CURRENT);
+								    AlarmManager alarmManager = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+								    alarmManager.cancel(pendingIntent);
+								     if(isTabType == 2) {
+								    	 SidraPulseApp.getInstance().getEventsInfoList().remove(index);
+								    	 if(SidraPulseApp.getInstance().getEventsInfoList().size() == 0) {
+								    		 listViewEvents.setVisibility(View.GONE);
+								    		 txtViewEmptyMsg.setVisibility(View.VISIBLE);
+								    		 
+								    	 }
+								    	 EventAdapter.this.notifyDataSetChanged();
+								     }
+									Utilities.showToast(context, activity.getResources().getString(R.string.toast_removed_events));
+									}
+								else{
+									Utilities.showToast(context, ConstantValues.failureMessage);
+								}
+							}
+						}).execute();
+					}
+				} else {
+					SidraPulseApp.getInstance().openDialogForInternetChecking(activity);
+				}
+			}
+		});
+
+		return convertView;
+	}
+
+	static class ViewHolder {
+		TextView txtViewTitle;
+		TextView txtViewVenue;
+		TextView txtViewDescription;
+		TextView txtViewStartDate;
+		TextView txtViewStartDay;
+		
+		TextView txtViewEndDate;
+		TextView txtViewEndDay;
+		
+		TextView txtViewStartTime;
+		TextView txtViewEndTime;
+		
+		TextView txtViewTo;
+		
+		ImageView imgViewFavoriate;
+	}
+
+}

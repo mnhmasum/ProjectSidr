@@ -1,0 +1,341 @@
+package com.atomix.sidrapulse;
+
+import java.io.IOException;
+import java.util.regex.Pattern;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.provider.Settings.Secure;
+import android.text.Editable;
+import android.text.SpannableString;
+import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
+import android.text.style.UnderlineSpan;
+import android.text.util.Linkify;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.atomix.interfacecallback.OnRequestComplete;
+import com.atomix.internetconnection.InternetConnectivity;
+import com.atomix.sharedpreference.PreferenceUtil;
+import com.atomix.sidrainfo.ConstantValues;
+import com.atomix.sidrainfo.SidraPulseApp;
+import com.atomix.synctask.SignInAsyncTask;
+import com.atomix.utils.Utilities;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+
+public class SignInActivity extends Activity implements OnClickListener {
+
+	private RelativeLayout relativeMain;
+	private EditText edTxtSidraUserID;
+	private EditText edTxtPassword;
+	private CheckBox checkBoxTemrsAndCondition;
+	private Button btnSignIn;
+	private TextView txtViewTermsofUse;
+	private TextView txtViewTermsOfCondition;
+	private PreferenceUtil preferenceUtil;
+	
+	// For GCM
+	
+	public static final String EXTRA_MESSAGE = "message";
+    public static final String PROPERTY_REG_ID = "registration_id";
+    private static final String PROPERTY_APP_VERSION = "appVersion";
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    
+    String SENDER_ID = "108890694118";
+    
+    static final String TAG = "MainMenuActivity";
+    
+    private GoogleCloudMessaging gcm;
+    SharedPreferences prefs;
+    private String regid;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_sign_in);
+		
+		initViews();
+		setLinkifyOverActivity();
+		
+		if (checkPlayServices()) {
+			gcm = GoogleCloudMessaging.getInstance(this);
+			regid = getRegistrationId(getApplicationContext());
+			preferenceUtil.setRegistrationKey(regid);
+			Log.i("Reg id is : ", "_____________" + regid);
+
+			if (regid.isEmpty()) {
+				registerInBackground();
+			}
+		} else {
+			Log.i(TAG, "No valid Google Play Services APK found.");
+		}
+		
+		setListener();
+		setTermsofUseUnderline();
+		
+	}
+
+	private void setLinkifyOverActivity() {
+		Pattern myPattern = Pattern.compile("Terms of Use");
+		txtViewTermsOfCondition.setMovementMethod(LinkMovementMethod.getInstance());
+		String newActivityURL = "atomix://com.atomix.sidrapulse.TermsOfUseActivity/";
+		Linkify.addLinks(txtViewTermsOfCondition, myPattern, newActivityURL);
+		txtViewTermsOfCondition.setLinkTextColor(this.getResources().getColor(R.color.blue));
+	}
+
+	private void setTermsofUseUnderline() {
+		SpannableString content = new SpannableString(txtViewTermsofUse.getText().toString());
+		content.setSpan(new UnderlineSpan(), 0, txtViewTermsofUse.getText().toString().length(), 0);
+		txtViewTermsofUse.setText(content);
+	}
+
+	private void initViews() {
+		relativeMain = (RelativeLayout) findViewById(R.id.relavie_sign_in);
+		edTxtSidraUserID = (EditText) findViewById(R.id.ed_txt_user_id);
+		edTxtPassword = (EditText) findViewById(R.id.ed_txt_user_password);
+		checkBoxTemrsAndCondition = (CheckBox) findViewById(R.id.check_box);
+		btnSignIn = (Button) findViewById(R.id.btn_sign_in);
+		btnSignIn.setEnabled(false);
+		btnSignIn.setAlpha(0.45f);
+		txtViewTermsofUse = (TextView) findViewById(R.id.txt_view_terms_of_use);
+		txtViewTermsOfCondition = (TextView) findViewById(R.id.txt_view_terms_condition);
+		
+		preferenceUtil = new PreferenceUtil(getApplicationContext());
+	}
+
+	private void setListener() {
+		checkBoxTemrsAndCondition.setOnClickListener(this);
+		btnSignIn.setOnClickListener(this);
+		relativeMain.setOnClickListener(this);
+		txtViewTermsofUse.setOnClickListener(this);
+		
+		edTxtSidraUserID.addTextChangedListener(new TextWatcher() {
+		    @Override
+		    public void onTextChanged(CharSequence s, int start, int before, int count) {
+		    	
+		    }
+
+		    @Override
+		    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		    	
+		    }
+
+		    @Override
+		    public void afterTextChanged(Editable s) {
+		    	processTermsAndConditoin();
+		    }
+		});
+		
+		edTxtPassword.addTextChangedListener(new TextWatcher() {
+		    @Override
+		    public void onTextChanged(CharSequence s, int start, int before, int count) {
+		    	
+		    }
+
+		    @Override
+		    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+		    	
+		    }
+
+		    @Override
+		    public void afterTextChanged(Editable s) {
+		    	processTermsAndConditoin();
+		    }
+		});
+	}
+
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+		case R.id.btn_sign_in:
+			processSignIn();
+			break;
+			
+		case R.id.relavie_sign_in:
+			SidraPulseApp.getInstance().hideKeyboard(getApplicationContext(), v);
+			break;
+			
+		case R.id.txt_view_terms_of_use:
+			startActivity(new Intent(SignInActivity.this, TermsOfUseActivity.class));
+			break;
+			
+		case R.id.check_box:
+			processTermsAndConditoin();
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	private void processTermsAndConditoin() {
+		if(checkBoxTemrsAndCondition.isChecked() && !"".equalsIgnoreCase(edTxtSidraUserID.getText().toString().trim()) && !"".equalsIgnoreCase(edTxtPassword.getText().toString().trim())) {
+			checkBoxTemrsAndCondition.setButtonDrawable(R.drawable.terms_holdar_act);
+			btnSignIn.setEnabled(true);
+			btnSignIn.setAlpha(1.0f);
+		} else {
+			checkBoxTemrsAndCondition.setButtonDrawable(R.drawable.terms_holdar);
+			btnSignIn.setAlpha(0.45f);
+			btnSignIn.setEnabled(false);
+		}
+	}
+
+	private void processSignIn() {
+		
+		if (!edTxtSidraUserID.getText().toString().trim().equalsIgnoreCase("") && !edTxtPassword.getText().toString().trim().equalsIgnoreCase("") && checkBoxTemrsAndCondition.isChecked()) 
+		{
+			if (InternetConnectivity.isConnectedToInternet(SignInActivity.this)) {
+				SignInAsyncTask signInRequest = new SignInAsyncTask(SignInActivity.this, new OnRequestComplete() {
+					
+					@Override
+					public void onRequestComplete(int signinStatus) {
+						if (signinStatus == 1) {
+							preferenceUtil.setUserID(edTxtSidraUserID.getText().toString().trim());
+							preferenceUtil.setUserPasword(edTxtPassword.getText().toString().trim());
+							preferenceUtil.setDeviceToken(getDeviceToken());
+							preferenceUtil.setRegistrationKey(regid);
+							
+							startActivity(new Intent(SignInActivity.this, MainMenuActivity.class).putExtra("First_Time", true));
+							finish();
+						} else {
+							SidraPulseApp.getInstance().openErrorDialog("Incorrect username or password. Hint: use your sidra network login credentials", SignInActivity.this);
+						}
+					}
+					
+				});
+					
+				signInRequest.execute(ConstantValues.FUNC_ID_SIGN_IN, edTxtSidraUserID.getText().toString().trim(), edTxtPassword.getText().toString().trim(), ConstantValues.DEVICE_TYPE, getDeviceToken(), regid);
+			
+			} else {
+				SidraPulseApp.getInstance().openDialogForInternetChecking(SignInActivity.this);
+				return;
+			}
+			
+								 
+	   } else if(edTxtSidraUserID.getText().toString().trim().equals("") || edTxtPassword.getText().toString().trim().equals("")) {
+			Toast.makeText(getApplicationContext(), "Incorrect username or password. Hint: use your sidra network login credentials", Toast.LENGTH_SHORT).show();
+		} else if (!checkBoxTemrsAndCondition.isChecked()) {
+			Toast.makeText(getApplicationContext(), "Please Read the Terms of Use and agree by tapping the Checkbox.", Toast.LENGTH_SHORT).show();
+		}
+	
+	}
+		
+	
+	private String getDeviceToken() {
+		return Secure.getString(SignInActivity.this.getContentResolver(), Secure.ANDROID_ID);
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		checkPlayServices();
+	}
+	
+	private boolean checkPlayServices() {
+	    int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+	    if (resultCode != ConnectionResult.SUCCESS) {
+	        if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+	            GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+	            
+	        } else {
+	            Log.i(TAG, "This device is not supported.");
+	            finish();
+	        }
+	        return false;
+	    }
+	    return true;
+	}
+	
+	private String getRegistrationId(Context context) {
+	    final SharedPreferences prefs = getGCMPreferences(context);
+	    String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+	    if (registrationId.isEmpty()) {
+	        Log.i(TAG, "Registration not found.");
+	        return "";
+	    }
+	    // Check if app was updated; if so, it must clear the registration ID since the existing regID is not guaranteed to work with the new app version.
+	    int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+	    int currentVersion = getAppVersion(context);
+	    if (registeredVersion != currentVersion) {
+	        Log.i(TAG, "App version changed.");
+	        return "";
+	    }
+	    return registrationId;
+	}
+	
+	private SharedPreferences getGCMPreferences(Context context) {
+	    // This sample app persists the registration ID in shared preferences, but how you store the regID in your app is up to you.
+	    return getSharedPreferences(SignInActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+	}
+	
+	private static int getAppVersion(Context context) {
+	    try {
+	        PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+	        return packageInfo.versionCode;
+	    } 
+	    catch (NameNotFoundException e) {
+	        // should never happen
+	        throw new RuntimeException("Could not get package name: " + e);
+	    }
+	}
+	
+	private void registerInBackground() {
+		class APITaskGCM extends AsyncTask<Void, Void, String> {
+			@Override
+			protected String doInBackground(Void... params) {
+				// TODO Auto-generated method stub
+				 String msg = "";
+		            try {
+		                if (gcm == null) {
+		                    gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+		                }
+		                regid = gcm.register(SENDER_ID);
+		                preferenceUtil.setRegistrationKey(regid);
+		                msg = "Device registered, registration id=" + regid;
+	
+		                storeRegistrationId(getApplicationContext(), regid);
+		            } 
+		            catch (IOException ex) {
+		                msg = "Error :" + ex.getMessage();
+		            }
+		            return msg;
+			}
+
+			@Override
+			protected void onPostExecute(String result) {
+				Log.v(TAG, "Successful !");
+				Log.v(TAG, "gcm_regid: " + regid);
+			}
+		}
+		
+		new APITaskGCM().execute();
+	}
+	
+	private void storeRegistrationId(Context context, String regId) {
+	    final SharedPreferences prefs = getGCMPreferences(context);
+	    int appVersion = getAppVersion(context);
+	    Log.i(TAG, "Saving regId on app version " + appVersion);
+	    SharedPreferences.Editor editor = prefs.edit();
+	    editor.putString(PROPERTY_REG_ID, regId);
+	    editor.putInt(PROPERTY_APP_VERSION, appVersion);
+	    editor.commit();
+	}
+
+}
